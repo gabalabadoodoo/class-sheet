@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone } from "lucide-react";
 
 const Index = () => {
-  const { classes, addClass, updateClass, deleteClass, resetSchedule } = useSchedule();
+  const { classes, addClass, updateClass, deleteClass, resetSchedule, clearSchedule } = useSchedule();
   const [search, setSearch] = useState("");
   const [dayFilter, setDayFilter] = useState<string>("ALL");
   const [locationFilter, setLocationFilter] = useState<string>("ALL");
@@ -157,6 +157,7 @@ const Index = () => {
         onAdd={addClass}
         onUpdate={updateClass}
         onDelete={deleteClass}
+        onClearAll={clearSchedule}
       />
     </div>
   );
