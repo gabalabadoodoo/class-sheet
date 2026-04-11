@@ -71,7 +71,8 @@ export function CalendarView({ classes, onEdit }: CalendarViewProps) {
                     }}
                   >
                     <p className="text-[9px] sm:text-xs font-bold truncate leading-tight">{entry.className}</p>
-                    <p className="text-[8px] sm:text-[10px] opacity-90 truncate leading-tight">{entry.location}</p>
+                    <p className="text-[8px] sm:text-[10px] opacity-90 truncate leading-tight font-mono">{entry.classId}</p>
+                    <p className="text-[8px] sm:text-[10px] opacity-80 truncate leading-tight">{entry.location}</p>
                     <p className="text-[8px] sm:text-[10px] opacity-80 truncate leading-tight hidden xs:block">
                       {entry.startTime} – {entry.endTime}
                     </p>

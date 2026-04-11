@@ -9,7 +9,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
 
 interface ClassManagerDialogProps {
   open: boolean;
@@ -18,6 +18,7 @@ interface ClassManagerDialogProps {
   onAdd: (data: Omit<ClassEntry, "id">) => void;
   onUpdate: (id: string, data: Omit<ClassEntry, "id">) => void;
   onDelete: (id: string) => void;
+  onClearAll: () => void;
 }
 
 interface GroupedClass {
@@ -25,11 +26,12 @@ interface GroupedClass {
   entries: ClassEntry[];
 }
 
-export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete }: ClassManagerDialogProps) {
+export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onClearAll }: ClassManagerDialogProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
   const [prefill, setPrefill] = useState<Partial<Omit<ClassEntry, "id">> | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const grouped = useMemo<GroupedClass[]>(() => {
@@ -128,9 +130,14 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Manage Classes</span>
-              <Button onClick={handleAddNew} size="sm" className="h-8 text-xs gap-1">
-                <Plus className="h-3.5 w-3.5" /> New Class
-              </Button>
+              <div className="flex gap-1.5">
+                <Button onClick={() => setClearAllOpen(true)} variant="destructive" size="sm" className="h-8 text-xs gap-1" disabled={classes.length === 0}>
+                  <Trash2 className="h-3.5 w-3.5" /> Clear All
+                </Button>
+                <Button onClick={handleAddNew} size="sm" className="h-8 text-xs gap-1">
+                  <Plus className="h-3.5 w-3.5" /> New Class
+                </Button>
+              </div>
             </DialogTitle>
           </DialogHeader>
 
@@ -240,6 +247,26 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => { if (deleteId) onDelete(deleteId); setDeleteId(null); }}>
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear all confirmation */}
+      <AlertDialog open={clearAllOpen} onOpenChange={setClearAllOpen}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" /> Clear all classes?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove all {classes.length} classes from your schedule. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { onClearAll(); setClearAllOpen(false); }}>
+              Clear All
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

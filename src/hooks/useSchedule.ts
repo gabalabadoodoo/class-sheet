@@ -29,5 +29,9 @@ export function useSchedule() {
     setClasses(DEFAULT_SCHEDULE);
   };
 
-  return { classes, addClass, updateClass, deleteClass, resetSchedule };
+  const clearSchedule = () => {
+    setClasses([]);
+  };
+
+  return { classes, addClass, updateClass, deleteClass, resetSchedule, clearSchedule };
 }
