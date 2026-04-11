@@ -14,9 +14,10 @@ interface ClassFormDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: Omit<ClassEntry, "id">) => void;
   initialData?: ClassEntry | null;
+  prefill?: Partial<Omit<ClassEntry, "id">> | null;
 }
 
-export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData }: ClassFormDialogProps) {
+export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, prefill }: ClassFormDialogProps) {
   const { register, handleSubmit, reset, setValue, watch } = useForm<Omit<ClassEntry, "id">>({
     defaultValues: {
       className: "", classId: "", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM",
@@ -33,10 +34,19 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData }: C
         startTime: initialData.startTime,
         endTime: initialData.endTime,
       });
+    } else if (prefill) {
+      reset({
+        className: prefill.className || "",
+        classId: prefill.classId || "",
+        day: prefill.day || "MONDAY",
+        location: prefill.location || "",
+        startTime: prefill.startTime || "7:00 AM",
+        endTime: prefill.endTime || "8:00 AM",
+      });
     } else {
       reset({ className: "", classId: "", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM" });
     }
-  }, [initialData, reset, open]);
+  }, [initialData, prefill, reset, open]);
 
   const onFormSubmit = (data: Omit<ClassEntry, "id">) => {
     onSubmit(data);

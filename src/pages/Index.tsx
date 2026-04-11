@@ -4,25 +4,20 @@ import { ClassEntry, DAYS, DayOfWeek } from "@/lib/schedule-data";
 import { CalendarView } from "@/components/CalendarView";
 import { TableView } from "@/components/TableView";
 import { TodayView } from "@/components/TodayView";
-import { ClassFormDialog } from "@/components/ClassFormDialog";
+import { ClassManagerDialog } from "@/components/ClassManagerDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Plus, Search, CalendarDays, List, RotateCcw, Sun } from "lucide-react";
+import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone } from "lucide-react";
 
 const Index = () => {
   const { classes, addClass, updateClass, deleteClass, resetSchedule } = useSchedule();
   const [search, setSearch] = useState("");
   const [dayFilter, setDayFilter] = useState<string>("ALL");
   const [locationFilter, setLocationFilter] = useState<string>("ALL");
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<ClassEntry | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [managerOpen, setManagerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"mobile" | "desktop">("mobile");
 
   const filtered = useMemo(() => {
     return classes.filter((c) => {
@@ -39,37 +34,34 @@ const Index = () => {
   }, [classes, search, dayFilter, locationFilter]);
 
   const handleEdit = (entry: ClassEntry) => {
-    setEditingClass(entry);
-    setFormOpen(true);
+    setManagerOpen(true);
   };
 
-  const handleFormSubmit = (data: Omit<ClassEntry, "id">) => {
-    if (editingClass) {
-      updateClass(editingClass.id, data);
-    } else {
-      addClass(data);
-    }
-    setEditingClass(null);
-  };
-
-  const handleAdd = () => {
-    setEditingClass(null);
-    setFormOpen(true);
-  };
+  const containerClass = viewMode === "desktop" ? "max-w-5xl" : "max-w-lg";
 
   return (
     <div className="min-h-screen bg-background safe-area-insets">
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="max-w-lg mx-auto px-4 py-3">
+        <div className={`${containerClass} mx-auto px-4 py-3`}>
           <div className="flex items-center justify-between">
             <div className="min-w-0">
               <h1 className="text-lg font-bold text-foreground tracking-tight">📚 Class Schedule</h1>
               <p className="text-[11px] text-muted-foreground">{classes.length} classes this semester</p>
             </div>
-            <div className="flex gap-1.5 shrink-0">
-              <Button onClick={handleAdd} size="sm" className="h-8 px-2.5 text-xs">
-                <Plus className="h-3.5 w-3.5 mr-1" /> Add
+            <div className="flex gap-1.5 shrink-0 items-center">
+              {/* View mode toggle */}
+              <Button
+                onClick={() => setViewMode(viewMode === "mobile" ? "desktop" : "mobile")}
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0"
+                title={viewMode === "mobile" ? "Switch to desktop view" : "Switch to mobile view"}
+              >
+                {viewMode === "mobile" ? <Monitor className="h-3.5 w-3.5" /> : <Smartphone className="h-3.5 w-3.5" />}
+              </Button>
+              <Button onClick={() => setManagerOpen(true)} size="sm" className="h-8 px-2.5 text-xs">
+                <Settings className="h-3.5 w-3.5 mr-1" /> Edit
               </Button>
               <Button onClick={resetSchedule} variant="outline" size="sm" className="h-8 w-8 p-0">
                 <RotateCcw className="h-3.5 w-3.5" />
@@ -79,7 +71,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-3 space-y-3">
+      <main className={`${containerClass} mx-auto px-4 py-3 space-y-3`}>
         {/* Views */}
         <Tabs defaultValue="today">
           <TabsList className="w-full h-10 grid grid-cols-3">
@@ -151,35 +143,21 @@ const Index = () => {
               </Select>
             </div>
             <div className="rounded-lg border border-border bg-card overflow-x-auto">
-              <TableView classes={filtered} onEdit={handleEdit} onDelete={(id) => setDeleteId(id)} />
+              <TableView classes={filtered} onEdit={handleEdit} onDelete={(id) => deleteClass(id)} />
             </div>
           </TabsContent>
         </Tabs>
       </main>
 
-      {/* Add/Edit Dialog */}
-      <ClassFormDialog
-        open={formOpen}
-        onOpenChange={(open) => { setFormOpen(open); if (!open) setEditingClass(null); }}
-        onSubmit={handleFormSubmit}
-        initialData={editingClass}
+      {/* Class Manager Dialog */}
+      <ClassManagerDialog
+        open={managerOpen}
+        onOpenChange={setManagerOpen}
+        classes={classes}
+        onAdd={addClass}
+        onUpdate={updateClass}
+        onDelete={deleteClass}
       />
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this class?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (deleteId) deleteClass(deleteId); setDeleteId(null); }}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
