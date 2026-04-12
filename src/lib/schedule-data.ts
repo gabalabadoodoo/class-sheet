@@ -4,6 +4,7 @@ export interface ClassEntry {
   id: string;
   className: string;
   classId: string;
+  section: string;
   day: DayOfWeek;
   location: string;
   startTime: string; // "7:00 AM"
