@@ -131,7 +131,7 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
                   </div>
 
                   {/* Details */}
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {entry.startTime} – {entry.endTime}
@@ -140,6 +140,7 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
                       {isOnline ? <Wifi className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
                       {entry.location}
                     </span>
+                    <span className="text-[10px] font-mono">{entry.section}</span>
                   </div>
                 </div>
               </div>

@@ -20,7 +20,7 @@ interface ClassFormDialogProps {
 export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, prefill }: ClassFormDialogProps) {
   const { register, handleSubmit, reset, setValue, watch } = useForm<Omit<ClassEntry, "id">>({
     defaultValues: {
-      className: "", classId: "", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM",
+      className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM",
     },
   });
 
@@ -29,6 +29,7 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
       reset({
         className: initialData.className,
         classId: initialData.classId,
+        section: initialData.section || "TS21",
         day: initialData.day,
         location: initialData.location,
         startTime: initialData.startTime,
@@ -38,18 +39,19 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
       reset({
         className: prefill.className || "",
         classId: prefill.classId || "",
+        section: prefill.section || "TS21",
         day: prefill.day || "MONDAY",
         location: prefill.location || "",
         startTime: prefill.startTime || "7:00 AM",
         endTime: prefill.endTime || "8:00 AM",
       });
     } else {
-      reset({ className: "", classId: "", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM" });
+      reset({ className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM" });
     }
   }, [initialData, prefill, reset, open]);
 
   const onFormSubmit = (data: Omit<ClassEntry, "id">) => {
-    onSubmit(data);
+    onSubmit({ ...data, section: data.section || "TS21" });
     onOpenChange(false);
   };
 
@@ -69,6 +71,10 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
               <Label>Class ID</Label>
               <Input {...register("classId", { required: true })} placeholder="e.g. CS0079" />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Section</Label>
+            <Input {...register("section")} placeholder="TS21 (default)" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

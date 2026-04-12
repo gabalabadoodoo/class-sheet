@@ -46,6 +46,7 @@ export function TableView({ classes, onEdit, onDelete, editMode }: TableViewProp
         <TableRow>
           <TableHead><SortHeader label="Class" field="className" /></TableHead>
           <TableHead><SortHeader label="ID" field="classId" /></TableHead>
+          <TableHead>Section</TableHead>
           <TableHead><SortHeader label="Day" field="day" /></TableHead>
           <TableHead><SortHeader label="Location" field="location" /></TableHead>
           <TableHead><SortHeader label="Start" field="startTime" /></TableHead>
@@ -63,6 +64,7 @@ export function TableView({ classes, onEdit, onDelete, editMode }: TableViewProp
               </span>
             </TableCell>
             <TableCell className="font-mono text-xs">{entry.classId}</TableCell>
+            <TableCell className="font-mono text-xs">{entry.section}</TableCell>
             <TableCell>{entry.day.charAt(0) + entry.day.slice(1).toLowerCase()}</TableCell>
             <TableCell>{entry.location}</TableCell>
             <TableCell>{entry.startTime}</TableCell>
@@ -81,7 +83,7 @@ export function TableView({ classes, onEdit, onDelete, editMode }: TableViewProp
         ))}
         {sorted.length === 0 && (
           <TableRow>
-            <TableCell colSpan={editMode ? 7 : 6} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={editMode ? 8 : 7} className="text-center py-8 text-muted-foreground">
               No classes found
             </TableCell>
           </TableRow>
