@@ -72,7 +72,6 @@ const Index = () => {
               >
                 {viewMode === "mobile" ? <Monitor className="h-3.5 w-3.5" /> : <Smartphone className="h-3.5 w-3.5" />}
               </Button>
-              </Button>
               <Button onClick={() => setManagerOpen(true)} size="sm" className="h-8 px-2.5 text-xs">
                 <Settings className="h-3.5 w-3.5 mr-1" /> Edit
               </Button>
