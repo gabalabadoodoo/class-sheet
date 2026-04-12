@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone } from "lucide-react";
+import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil } from "lucide-react";
 
 const Index = () => {
   const { classes, addClass, updateClass, deleteClass, resetSchedule, clearSchedule } = useSchedule();
@@ -18,6 +18,7 @@ const Index = () => {
   const [locationFilter, setLocationFilter] = useState<string>("ALL");
   const [managerOpen, setManagerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"mobile" | "desktop">("mobile");
+  const [editMode, setEditMode] = useState(false);
 
   const filtered = useMemo(() => {
     return classes.filter((c) => {
@@ -50,6 +51,17 @@ const Index = () => {
               <p className="text-[11px] text-muted-foreground">{classes.length} classes this semester</p>
             </div>
             <div className="flex gap-1.5 shrink-0 items-center">
+              {/* Edit mode toggle */}
+              <Button
+                onClick={() => setEditMode(!editMode)}
+                variant={editMode ? "default" : "outline"}
+                size="sm"
+                className="h-8 px-2.5 text-xs gap-1"
+                title={editMode ? "Switch to view mode" : "Switch to edit mode"}
+              >
+                {editMode ? <Pencil className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {editMode ? "Editing" : "Viewing"}
+              </Button>
               {/* View mode toggle */}
               <Button
                 onClick={() => setViewMode(viewMode === "mobile" ? "desktop" : "mobile")}
@@ -87,7 +99,7 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="today" className="mt-3">
-            <TodayView classes={classes} onEdit={handleEdit} />
+            <TodayView classes={classes} onEdit={handleEdit} editMode={editMode} />
           </TabsContent>
 
           <TabsContent value="calendar" className="mt-3">
@@ -115,7 +127,7 @@ const Index = () => {
               </Select>
             </div>
             <div className="rounded-lg border border-border bg-card p-2">
-              <CalendarView classes={filtered} onEdit={handleEdit} />
+              <CalendarView classes={filtered} onEdit={handleEdit} editMode={editMode} />
             </div>
           </TabsContent>
 
@@ -143,7 +155,7 @@ const Index = () => {
               </Select>
             </div>
             <div className="rounded-lg border border-border bg-card overflow-x-auto">
-              <TableView classes={filtered} onEdit={handleEdit} onDelete={(id) => deleteClass(id)} />
+              <TableView classes={filtered} onEdit={handleEdit} onDelete={(id) => deleteClass(id)} editMode={editMode} />
             </div>
           </TabsContent>
         </Tabs>

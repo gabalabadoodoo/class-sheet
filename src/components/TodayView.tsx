@@ -5,12 +5,13 @@ import { MapPin, Clock, Wifi } from "lucide-react";
 interface TodayViewProps {
   classes: ClassEntry[];
   onEdit: (entry: ClassEntry) => void;
+  editMode: boolean;
 }
 
 function getCurrentDayOfWeek(): DayOfWeek | null {
   const jsDay = new Date().getDay(); // 0=Sun, 1=Mon...
   const map: Record<number, DayOfWeek> = {
-    1: "MONDAY", 2: "TUESDAY", 3: "WEDNESDAY", 4: "THURSDAY", 5: "FRIDAY",
+    1: "MONDAY", 2: "TUESDAY", 3: "WEDNESDAY", 4: "THURSDAY", 5: "FRIDAY", 6: "SATURDAY",
   };
   return map[jsDay] || null;
 }
@@ -20,7 +21,7 @@ function getCurrentTimeDecimal(): number {
   return now.getHours() + now.getMinutes() / 60;
 }
 
-export function TodayView({ classes, onEdit }: TodayViewProps) {
+export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
   const [now, setNow] = useState(getCurrentTimeDecimal);
   const today = getCurrentDayOfWeek();
 
@@ -88,10 +89,12 @@ export function TodayView({ classes, onEdit }: TodayViewProps) {
           const isOnline = entry.location === "ONLINE";
 
           return (
-            <button
+            <div
               key={entry.id}
-              onClick={() => onEdit(entry)}
+              onClick={() => editMode && onEdit(entry)}
               className={`w-full text-left rounded-xl p-3 transition-all border ${
+                editMode ? "cursor-pointer" : "cursor-default"
+              } ${
                 status === "active"
                   ? "border-primary/40 bg-primary/5 shadow-md ring-2 ring-primary/20"
                   : status === "done"
@@ -140,7 +143,7 @@ export function TodayView({ classes, onEdit }: TodayViewProps) {
                   </div>
                 </div>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

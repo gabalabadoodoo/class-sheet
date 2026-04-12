@@ -1,4 +1,4 @@
-export type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
+export type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY";
 
 export interface ClassEntry {
   id: string;
@@ -21,7 +21,7 @@ export const CLASS_COLORS: Record<string, string> = {
   "PurComm": "hsl(0, 65%, 50%)",
 };
 
-export const DAYS: DayOfWeek[] = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
+export const DAYS: DayOfWeek[] = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
 export const DEFAULT_SCHEDULE: ClassEntry[] = [
   { id: "1", className: "AppDev LEC", classId: "CCS0043", day: "FRIDAY", location: "ONLINE", startTime: "7:00 AM", endTime: "9:40 AM" },

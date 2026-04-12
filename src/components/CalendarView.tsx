@@ -5,9 +5,10 @@ const HOURS = Array.from({ length: 13 }, (_, i) => i + 7); // 7 AM to 7 PM
 interface CalendarViewProps {
   classes: ClassEntry[];
   onEdit: (entry: ClassEntry) => void;
+  editMode: boolean;
 }
 
-export function CalendarView({ classes, onEdit }: CalendarViewProps) {
+export function CalendarView({ classes, onEdit, editMode }: CalendarViewProps) {
   const getClassesForDay = (day: string) =>
     classes.filter((c) => c.day === day);
 
@@ -15,7 +16,7 @@ export function CalendarView({ classes, onEdit }: CalendarViewProps) {
     <div className="overflow-x-auto -mx-2 sm:mx-0 touch-pan-x">
       <div className="min-w-[600px] sm:min-w-[800px]">
         {/* Header */}
-        <div className="grid grid-cols-[60px_repeat(5,1fr)] sm:grid-cols-[80px_repeat(5,1fr)] border-b border-border sticky top-0 bg-card z-[1]">
+        <div className="grid grid-cols-[60px_repeat(6,1fr)] sm:grid-cols-[80px_repeat(6,1fr)] border-b border-border sticky top-0 bg-card z-[1]">
           <div className="p-1.5 sm:p-2 text-xs sm:text-sm font-medium text-muted-foreground">Time</div>
           {DAYS.map((day) => (
             <div key={day} className="p-1.5 sm:p-2 text-center text-xs sm:text-sm font-semibold text-foreground border-l border-border">
@@ -26,7 +27,7 @@ export function CalendarView({ classes, onEdit }: CalendarViewProps) {
         </div>
 
         {/* Time grid */}
-        <div className="relative grid grid-cols-[60px_repeat(5,1fr)] sm:grid-cols-[80px_repeat(5,1fr)]">
+        <div className="relative grid grid-cols-[60px_repeat(6,1fr)] sm:grid-cols-[80px_repeat(6,1fr)]">
           {/* Time labels */}
           <div>
             {HOURS.map((hour) => (
@@ -58,10 +59,10 @@ export function CalendarView({ classes, onEdit }: CalendarViewProps) {
                 const color = getClassColor(entry.className);
 
                 return (
-                  <button
+                  <div
                     key={entry.id}
-                    onClick={() => onEdit(entry)}
-                    className="absolute left-0.5 right-0.5 sm:left-1 sm:right-1 rounded-md px-1 sm:px-2 py-0.5 sm:py-1 text-left overflow-hidden cursor-pointer transition-opacity hover:opacity-90 active:opacity-80"
+                    onClick={() => editMode && onEdit(entry)}
+                    className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 rounded-md px-1 sm:px-2 py-0.5 sm:py-1 text-left overflow-hidden transition-opacity ${editMode ? "cursor-pointer hover:opacity-90 active:opacity-80" : "cursor-default"}`}
                     style={{
                       top: `${top}px`,
                       height: `${height}px`,
@@ -76,7 +77,7 @@ export function CalendarView({ classes, onEdit }: CalendarViewProps) {
                     <p className="text-[8px] sm:text-[10px] opacity-80 truncate leading-tight hidden xs:block">
                       {entry.startTime} – {entry.endTime}
                     </p>
-                  </button>
+                  </div>
                 );
               })}
             </div>

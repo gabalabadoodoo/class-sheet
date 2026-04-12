@@ -8,15 +8,16 @@ interface TableViewProps {
   classes: ClassEntry[];
   onEdit: (entry: ClassEntry) => void;
   onDelete: (id: string) => void;
+  editMode: boolean;
 }
 
 type SortKey = "className" | "classId" | "day" | "location" | "startTime";
 
-export function TableView({ classes, onEdit, onDelete }: TableViewProps) {
+export function TableView({ classes, onEdit, onDelete, editMode }: TableViewProps) {
   const [sortKey, setSortKey] = useState<SortKey>("day");
   const [sortAsc, setSortAsc] = useState(true);
 
-  const dayOrder = { MONDAY: 0, TUESDAY: 1, WEDNESDAY: 2, THURSDAY: 3, FRIDAY: 4 };
+  const dayOrder: Record<string, number> = { MONDAY: 0, TUESDAY: 1, WEDNESDAY: 2, THURSDAY: 3, FRIDAY: 4, SATURDAY: 5 };
 
   const sorted = [...classes].sort((a, b) => {
     let cmp = 0;
@@ -49,7 +50,7 @@ export function TableView({ classes, onEdit, onDelete }: TableViewProps) {
           <TableHead><SortHeader label="Location" field="location" /></TableHead>
           <TableHead><SortHeader label="Start" field="startTime" /></TableHead>
           <TableHead>End</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          {editMode && <TableHead className="text-right">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -66,19 +67,21 @@ export function TableView({ classes, onEdit, onDelete }: TableViewProps) {
             <TableCell>{entry.location}</TableCell>
             <TableCell>{entry.startTime}</TableCell>
             <TableCell>{entry.endTime}</TableCell>
-            <TableCell className="text-right">
-              <Button variant="ghost" size="icon" onClick={() => onEdit(entry)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => onDelete(entry.id)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </TableCell>
+            {editMode && (
+              <TableCell className="text-right">
+                <Button variant="ghost" size="icon" onClick={() => onEdit(entry)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => onDelete(entry.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </TableCell>
+            )}
           </TableRow>
         ))}
         {sorted.length === 0 && (
           <TableRow>
-            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={editMode ? 7 : 6} className="text-center py-8 text-muted-foreground">
               No classes found
             </TableCell>
           </TableRow>
