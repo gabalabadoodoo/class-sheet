@@ -51,11 +51,9 @@ export function CalendarView({ classes, onEdit, editMode }: CalendarViewProps) {
               {getClassesForDay(day).map((entry) => {
                 const start = parseTime(entry.startTime);
                 const end = parseTime(entry.endTime);
-                const cellH = 48; // h-12 = 48px on mobile
-                const cellHSm = 64; // h-16 = 64px on desktop
-                // We use CSS for responsiveness but JS needs one value; use 48 as base
-                const top = (start - 7) * cellH;
-                const height = (end - start) * cellH;
+                const totalHours = HOURS.length; // 13
+                const topPercent = ((start - 7) / totalHours) * 100;
+                const heightPercent = ((end - start) / totalHours) * 100;
                 const color = getClassColor(entry.className);
 
                 return (
@@ -64,8 +62,8 @@ export function CalendarView({ classes, onEdit, editMode }: CalendarViewProps) {
                     onClick={() => editMode && onEdit(entry)}
                     className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 rounded-md px-1 sm:px-2 py-0.5 sm:py-1 text-left overflow-hidden transition-opacity ${editMode ? "cursor-pointer hover:opacity-90 active:opacity-80" : "cursor-default"}`}
                     style={{
-                      top: `${top}px`,
-                      height: `${height}px`,
+                      top: `${topPercent}%`,
+                      height: `${heightPercent}%`,
                       backgroundColor: color,
                       color: "white",
                       minHeight: "20px",
