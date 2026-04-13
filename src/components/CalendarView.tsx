@@ -62,8 +62,8 @@ export function CalendarView({ classes, onEdit, editMode }: CalendarViewProps) {
                     onClick={() => editMode && onEdit(entry)}
                     className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 rounded-md px-1 sm:px-2 py-0.5 sm:py-1 text-left overflow-hidden transition-opacity ${editMode ? "cursor-pointer hover:opacity-90 active:opacity-80" : "cursor-default"}`}
                     style={{
-                      top: `${top}px`,
-                      height: `${height}px`,
+                      top: `${topPercent}%`,
+                      height: `${heightPercent}%`,
                       backgroundColor: color,
                       color: "white",
                       minHeight: "20px",
