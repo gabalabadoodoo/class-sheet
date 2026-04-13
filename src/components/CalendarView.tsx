@@ -51,11 +51,9 @@ export function CalendarView({ classes, onEdit, editMode }: CalendarViewProps) {
               {getClassesForDay(day).map((entry) => {
                 const start = parseTime(entry.startTime);
                 const end = parseTime(entry.endTime);
-                const cellH = 48; // h-12 = 48px on mobile
-                const cellHSm = 64; // h-16 = 64px on desktop
-                // We use CSS for responsiveness but JS needs one value; use 48 as base
-                const top = (start - 7) * cellH;
-                const height = (end - start) * cellH;
+                const totalHours = HOURS.length; // 13
+                const topPercent = ((start - 7) / totalHours) * 100;
+                const heightPercent = ((end - start) / totalHours) * 100;
                 const color = getClassColor(entry.className);
 
                 return (
