@@ -20,7 +20,7 @@ interface ClassFormDialogProps {
 export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, prefill }: ClassFormDialogProps) {
   const { register, handleSubmit, reset, setValue, watch } = useForm<Omit<ClassEntry, "id">>({
     defaultValues: {
-      className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM",
+      className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM", meetingLink: "",
     },
   });
 
