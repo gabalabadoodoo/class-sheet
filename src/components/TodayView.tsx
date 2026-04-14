@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ClassEntry, DAYS, DayOfWeek, parseTime, getClassColor } from "@/lib/schedule-data";
 import { MapPin, Clock, Wifi, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CountdownCard } from "@/components/CountdownCard";
 
 interface TodayViewProps {
   classes: ClassEntry[];
@@ -72,6 +73,9 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
 
   return (
     <div className="space-y-3">
+      {/* Countdown card */}
+      <CountdownCard classes={classes} />
+
       {/* Day header */}
       <div className="flex items-center justify-between px-1">
         <h2 className="text-base font-bold text-foreground">

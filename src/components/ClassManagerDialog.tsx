@@ -9,7 +9,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload } from "lucide-react";
+import { ImportScheduleDialog } from "@/components/ImportScheduleDialog";
 
 interface ClassManagerDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
   const [prefill, setPrefill] = useState<Partial<Omit<ClassEntry, "id">> | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [clearAllOpen, setClearAllOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const grouped = useMemo<GroupedClass[]>(() => {
@@ -131,6 +133,9 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
             <DialogTitle className="flex items-center justify-between">
               <span>Manage Classes</span>
               <div className="flex gap-1.5">
+                <Button onClick={() => setImportOpen(true)} variant="outline" size="sm" className="h-8 text-xs gap-1">
+                  <Upload className="h-3.5 w-3.5" /> Import
+                </Button>
                 <Button onClick={() => setClearAllOpen(true)} variant="destructive" size="sm" className="h-8 text-xs gap-1" disabled={classes.length === 0}>
                   <Trash2 className="h-3.5 w-3.5" /> Clear All
                 </Button>
@@ -271,6 +276,12 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Import dialog */}
+      <ImportScheduleDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={(entries) => entries.forEach((e) => onAdd(e))}
+      />
     </>
   );
 }
