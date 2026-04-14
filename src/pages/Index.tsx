@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil } from "lucide-react";
+import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, Bell, BellOff } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const Index = () => {
   const { classes, addClass, updateClass, deleteClass, resetSchedule, clearSchedule } = useSchedule();
@@ -19,6 +20,7 @@ const Index = () => {
   const [managerOpen, setManagerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"mobile" | "desktop">("mobile");
   const [editMode, setEditMode] = useState(false);
+  const { settings: notifSettings, toggleEnabled: toggleNotifications } = useNotifications(classes);
 
   const filtered = useMemo(() => {
     return classes.filter((c) => {
@@ -61,6 +63,16 @@ const Index = () => {
               >
                 {editMode ? <Pencil className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 {editMode ? "Editing" : "Viewing"}
+              </Button>
+              {/* Notifications toggle */}
+              <Button
+                onClick={toggleNotifications}
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0"
+                title={notifSettings.enabled ? "Disable notifications" : "Enable notifications"}
+              >
+                {notifSettings.enabled ? <Bell className="h-3.5 w-3.5 text-primary" /> : <BellOff className="h-3.5 w-3.5" />}
               </Button>
               {/* View mode toggle */}
               <Button
