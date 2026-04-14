@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ClassEntry, DAYS, DayOfWeek, parseTime, getClassColor } from "@/lib/schedule-data";
-import { MapPin, Clock, Wifi } from "lucide-react";
+import { MapPin, Clock, Wifi, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TodayViewProps {
   classes: ClassEntry[];
@@ -142,6 +143,34 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
                     </span>
                     <span className="text-[10px] font-mono">{entry.section}</span>
                   </div>
+
+                  {/* Join Link for online classes */}
+                  {isOnline && (
+                    <div className="mt-2">
+                      {entry.meetingLink ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs gap-1 px-2.5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(entry.meetingLink, "_blank");
+                          }}
+                        >
+                          <ExternalLink className="h-3 w-3" /> Join Link
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs gap-1 px-2.5 opacity-50 cursor-not-allowed"
+                          disabled
+                        >
+                          <ExternalLink className="h-3 w-3" /> Link Unavailable
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

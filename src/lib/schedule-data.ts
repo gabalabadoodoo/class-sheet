@@ -9,6 +9,7 @@ export interface ClassEntry {
   location: string;
   startTime: string; // "7:00 AM"
   endTime: string;
+  meetingLink?: string;
 }
 
 export const CLASS_COLORS: Record<string, string> = {
