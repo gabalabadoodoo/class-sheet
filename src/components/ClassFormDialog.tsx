@@ -24,6 +24,8 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
     },
   });
 
+  const watchLocation = watch("location");
+
   useEffect(() => {
     if (initialData) {
       reset({
@@ -34,6 +36,7 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
         location: initialData.location,
         startTime: initialData.startTime,
         endTime: initialData.endTime,
+        meetingLink: initialData.meetingLink || "",
       });
     } else if (prefill) {
       reset({
@@ -44,14 +47,19 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
         location: prefill.location || "",
         startTime: prefill.startTime || "7:00 AM",
         endTime: prefill.endTime || "8:00 AM",
+        meetingLink: prefill.meetingLink || "",
       });
     } else {
-      reset({ className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM" });
+      reset({ className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM", meetingLink: "" });
     }
   }, [initialData, prefill, reset, open]);
 
   const onFormSubmit = (data: Omit<ClassEntry, "id">) => {
-    onSubmit({ ...data, section: data.section || "TS21" });
+    const submitted = { ...data, section: data.section || "TS21" };
+    if (submitted.location !== "ONLINE") {
+      submitted.meetingLink = "";
+    }
+    onSubmit(submitted);
     onOpenChange(false);
   };
 
@@ -93,6 +101,12 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
               <Input {...register("location", { required: true })} placeholder="e.g. ONLINE or E401" />
             </div>
           </div>
+          {watchLocation?.toUpperCase() === "ONLINE" && (
+            <div className="space-y-2">
+              <Label>Meeting Link <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <Input {...register("meetingLink")} placeholder="https://zoom.us/j/..." />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Start Time</Label>
