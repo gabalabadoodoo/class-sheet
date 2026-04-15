@@ -364,6 +364,56 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Load template confirmation */}
+      <AlertDialog open={!!loadTemplateId} onOpenChange={(open) => !open && setLoadTemplateId(null)}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-primary" /> Load template?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace your current schedule with the saved template. Make sure to save your current schedule first if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              const t = templates.find((t) => t.id === loadTemplateId);
+              if (t) {
+                onLoadTemplate(t.classes);
+                toast.success(`Template "${t.name}" loaded`);
+              }
+              setLoadTemplateId(null);
+            }}>
+              Load
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete template confirmation */}
+      <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => !open && setDeleteTemplateId(null)}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this template?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => {
+              if (deleteTemplateId) {
+                const t = templates.find((t) => t.id === deleteTemplateId);
+                onDeleteTemplate(deleteTemplateId);
+                toast.success(`Template "${t?.name}" deleted`);
+              }
+              setDeleteTemplateId(null);
+            }}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Import dialog */}
       <ImportScheduleDialog
         open={importOpen}
