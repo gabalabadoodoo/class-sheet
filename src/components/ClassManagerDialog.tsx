@@ -158,6 +158,82 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
             </DialogTitle>
           </DialogHeader>
 
+          {/* Templates Section */}
+          <div className="border border-border rounded-lg p-3 space-y-2">
+            <button
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="w-full flex items-center gap-2 text-sm font-medium text-foreground"
+            >
+              <FolderOpen className="h-4 w-4" />
+              <span className="flex-1 text-left">Templates ({templates.length}/{maxTemplates})</span>
+              {showTemplates ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            </button>
+
+            {showTemplates && (
+              <div className="space-y-2 pt-1">
+                {/* Save current */}
+                <div className="flex gap-1.5">
+                  <Input
+                    placeholder="Template name..."
+                    value={saveTemplateName}
+                    onChange={(e) => setSaveTemplateName(e.target.value)}
+                    className="h-8 text-xs flex-1"
+                    maxLength={30}
+                  />
+                  <Button
+                    size="sm"
+                    className="h-8 text-xs gap-1 shrink-0"
+                    disabled={!saveTemplateName.trim() || classes.length === 0 || templates.length >= maxTemplates}
+                    onClick={() => {
+                      const ok = onSaveTemplate(saveTemplateName.trim(), classes);
+                      if (ok) {
+                        toast.success(`Template "${saveTemplateName.trim()}" saved`);
+                        setSaveTemplateName("");
+                      } else {
+                        toast.error(`Max ${maxTemplates} templates reached`);
+                      }
+                    }}
+                  >
+                    <Save className="h-3.5 w-3.5" /> Save
+                  </Button>
+                </div>
+
+                {templates.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground text-center py-2">No saved templates</p>
+                ) : (
+                  <div className="space-y-1">
+                    {templates.map((t) => (
+                      <div key={t.id} className="flex items-center gap-2 bg-muted/50 rounded-md px-2.5 py-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">{t.name}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {t.classes.length} classes · {new Date(t.savedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[11px] gap-1 shrink-0"
+                          onClick={() => setLoadTemplateId(t.id)}
+                        >
+                          Load
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          onClick={() => setDeleteTemplateId(t.id)}
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="flex-1 overflow-y-auto space-y-1 pr-1 -mr-1">
             {grouped.length === 0 && (
               <p className="text-center text-muted-foreground py-8 text-sm">No classes yet. Add one!</p>
