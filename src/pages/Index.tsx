@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, Bell, BellOff } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useTemplates } from "@/hooks/useTemplates";
 
 const Index = () => {
   const { classes, addClass, updateClass, deleteClass, resetSchedule, clearSchedule } = useSchedule();
@@ -21,6 +22,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<"mobile" | "desktop">("mobile");
   const [editMode, setEditMode] = useState(false);
   const { settings: notifSettings, toggleEnabled: toggleNotifications } = useNotifications(classes);
+  const { templates, saveTemplate, deleteTemplate, maxTemplates } = useTemplates();
 
   const filtered = useMemo(() => {
     return classes.filter((c) => {
@@ -182,6 +184,11 @@ const Index = () => {
         onUpdate={updateClass}
         onDelete={deleteClass}
         onClearAll={clearSchedule}
+        templates={templates}
+        maxTemplates={maxTemplates}
+        onSaveTemplate={saveTemplate}
+        onLoadTemplate={(classes) => { clearSchedule(); classes.forEach((c) => addClass({ ...c, id: undefined as any })); }}
+        onDeleteTemplate={deleteTemplate}
       />
     </div>
   );
