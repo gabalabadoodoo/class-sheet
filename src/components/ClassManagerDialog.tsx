@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { ClassEntry, getClassColor } from "@/lib/schedule-data";
 import { ClassFormDialog } from "@/components/ClassFormDialog";
+import { ScheduleTemplate } from "@/hooks/useTemplates";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -9,8 +10,10 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload, Save, FolderOpen } from "lucide-react";
 import { ImportScheduleDialog } from "@/components/ImportScheduleDialog";
+import { toast } from "sonner";
 
 interface ClassManagerDialogProps {
   open: boolean;
@@ -20,6 +23,11 @@ interface ClassManagerDialogProps {
   onUpdate: (id: string, data: Omit<ClassEntry, "id">) => void;
   onDelete: (id: string) => void;
   onClearAll: () => void;
+  templates: ScheduleTemplate[];
+  maxTemplates: number;
+  onSaveTemplate: (name: string, classes: ClassEntry[]) => boolean;
+  onLoadTemplate: (classes: ClassEntry[]) => void;
+  onDeleteTemplate: (id: string) => void;
 }
 
 interface GroupedClass {
@@ -27,7 +35,7 @@ interface GroupedClass {
   entries: ClassEntry[];
 }
 
-export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onClearAll }: ClassManagerDialogProps) {
+export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onClearAll, templates, maxTemplates, onSaveTemplate, onLoadTemplate, onDeleteTemplate }: ClassManagerDialogProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
   const [prefill, setPrefill] = useState<Partial<Omit<ClassEntry, "id">> | null>(null);
@@ -35,6 +43,10 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
   const [clearAllOpen, setClearAllOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [saveTemplateName, setSaveTemplateName] = useState("");
+  const [loadTemplateId, setLoadTemplateId] = useState<string | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
   const grouped = useMemo<GroupedClass[]>(() => {
     const map = new Map<string, ClassEntry[]>();
