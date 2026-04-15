@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { ClassEntry, getClassColor } from "@/lib/schedule-data";
 import { ClassFormDialog } from "@/components/ClassFormDialog";
+import { ScheduleTemplate } from "@/hooks/useTemplates";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -9,8 +10,10 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload, Save, FolderOpen } from "lucide-react";
 import { ImportScheduleDialog } from "@/components/ImportScheduleDialog";
+import { toast } from "sonner";
 
 interface ClassManagerDialogProps {
   open: boolean;
@@ -20,6 +23,11 @@ interface ClassManagerDialogProps {
   onUpdate: (id: string, data: Omit<ClassEntry, "id">) => void;
   onDelete: (id: string) => void;
   onClearAll: () => void;
+  templates: ScheduleTemplate[];
+  maxTemplates: number;
+  onSaveTemplate: (name: string, classes: ClassEntry[]) => boolean;
+  onLoadTemplate: (classes: ClassEntry[]) => void;
+  onDeleteTemplate: (id: string) => void;
 }
 
 interface GroupedClass {
@@ -27,7 +35,7 @@ interface GroupedClass {
   entries: ClassEntry[];
 }
 
-export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onClearAll }: ClassManagerDialogProps) {
+export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onClearAll, templates, maxTemplates, onSaveTemplate, onLoadTemplate, onDeleteTemplate }: ClassManagerDialogProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
   const [prefill, setPrefill] = useState<Partial<Omit<ClassEntry, "id">> | null>(null);
@@ -35,6 +43,10 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
   const [clearAllOpen, setClearAllOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [saveTemplateName, setSaveTemplateName] = useState("");
+  const [loadTemplateId, setLoadTemplateId] = useState<string | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
   const grouped = useMemo<GroupedClass[]>(() => {
     const map = new Map<string, ClassEntry[]>();
@@ -145,6 +157,82 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
               </div>
             </DialogTitle>
           </DialogHeader>
+
+          {/* Templates Section */}
+          <div className="border border-border rounded-lg p-3 space-y-2">
+            <button
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="w-full flex items-center gap-2 text-sm font-medium text-foreground"
+            >
+              <FolderOpen className="h-4 w-4" />
+              <span className="flex-1 text-left">Templates ({templates.length}/{maxTemplates})</span>
+              {showTemplates ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            </button>
+
+            {showTemplates && (
+              <div className="space-y-2 pt-1">
+                {/* Save current */}
+                <div className="flex gap-1.5">
+                  <Input
+                    placeholder="Template name..."
+                    value={saveTemplateName}
+                    onChange={(e) => setSaveTemplateName(e.target.value)}
+                    className="h-8 text-xs flex-1"
+                    maxLength={30}
+                  />
+                  <Button
+                    size="sm"
+                    className="h-8 text-xs gap-1 shrink-0"
+                    disabled={!saveTemplateName.trim() || classes.length === 0 || templates.length >= maxTemplates}
+                    onClick={() => {
+                      const ok = onSaveTemplate(saveTemplateName.trim(), classes);
+                      if (ok) {
+                        toast.success(`Template "${saveTemplateName.trim()}" saved`);
+                        setSaveTemplateName("");
+                      } else {
+                        toast.error(`Max ${maxTemplates} templates reached`);
+                      }
+                    }}
+                  >
+                    <Save className="h-3.5 w-3.5" /> Save
+                  </Button>
+                </div>
+
+                {templates.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground text-center py-2">No saved templates</p>
+                ) : (
+                  <div className="space-y-1">
+                    {templates.map((t) => (
+                      <div key={t.id} className="flex items-center gap-2 bg-muted/50 rounded-md px-2.5 py-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">{t.name}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {t.classes.length} classes · {new Date(t.savedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[11px] gap-1 shrink-0"
+                          onClick={() => setLoadTemplateId(t.id)}
+                        >
+                          Load
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          onClick={() => setDeleteTemplateId(t.id)}
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="flex-1 overflow-y-auto space-y-1 pr-1 -mr-1">
             {grouped.length === 0 && (
@@ -276,6 +364,56 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Load template confirmation */}
+      <AlertDialog open={!!loadTemplateId} onOpenChange={(open) => !open && setLoadTemplateId(null)}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-primary" /> Load template?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace your current schedule with the saved template. Make sure to save your current schedule first if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              const t = templates.find((t) => t.id === loadTemplateId);
+              if (t) {
+                onLoadTemplate(t.classes);
+                toast.success(`Template "${t.name}" loaded`);
+              }
+              setLoadTemplateId(null);
+            }}>
+              Load
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete template confirmation */}
+      <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => !open && setDeleteTemplateId(null)}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this template?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => {
+              if (deleteTemplateId) {
+                const t = templates.find((t) => t.id === deleteTemplateId);
+                onDeleteTemplate(deleteTemplateId);
+                toast.success(`Template "${t?.name}" deleted`);
+              }
+              setDeleteTemplateId(null);
+            }}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Import dialog */}
       <ImportScheduleDialog
         open={importOpen}
