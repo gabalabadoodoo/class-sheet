@@ -187,7 +187,7 @@ const Index = () => {
         templates={templates}
         maxTemplates={maxTemplates}
         onSaveTemplate={saveTemplate}
-        onLoadTemplate={(classes) => { clearSchedule(); classes.forEach((c) => addClass({ ...c, id: undefined as any })); }}
+        onLoadTemplate={(entries) => { clearSchedule(); entries.forEach((c) => { const { id, ...rest } = c; addClass(rest); }); }}
         onDeleteTemplate={deleteTemplate}
       />
     </div>
