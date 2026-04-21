@@ -40,7 +40,7 @@ export function useTemplates() {
         toast.error("Failed to load templates");
         return;
       }
-      setTemplates((data as DbTemplate[]).map((t) => ({
+      setTemplates((data as unknown as DbTemplate[]).map((t) => ({
         id: t.id,
         name: t.name,
         classes: t.classes,
@@ -69,7 +69,7 @@ export function useTemplates() {
         toast.error("Failed to save template");
         return;
       }
-      const t = data as DbTemplate;
+      const t = data as unknown as DbTemplate;
       setTemplates((prev) => [...prev, { id: t.id, name: t.name, classes: t.classes, savedAt: t.saved_at }]);
     })();
     return true;
