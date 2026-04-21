@@ -9,12 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, Bell, BellOff } from "lucide-react";
+import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, Bell, BellOff, LogOut } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useTemplates } from "@/hooks/useTemplates";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const { classes, addClass, updateClass, deleteClass, resetSchedule, clearSchedule } = useSchedule();
+  const { signOut } = useAuth();
   const [search, setSearch] = useState("");
   const [dayFilter, setDayFilter] = useState<string>("ALL");
   const [locationFilter, setLocationFilter] = useState<string>("ALL");
@@ -89,8 +91,11 @@ const Index = () => {
               <Button onClick={() => setManagerOpen(true)} size="sm" className="h-8 px-2.5 text-xs">
                 <Settings className="h-3.5 w-3.5 mr-1" /> Edit
               </Button>
-              <Button onClick={resetSchedule} variant="outline" size="sm" className="h-8 w-8 p-0">
+              <Button onClick={resetSchedule} variant="outline" size="sm" className="h-8 w-8 p-0" title="Reset to default schedule">
                 <RotateCcw className="h-3.5 w-3.5" />
+              </Button>
+              <Button onClick={signOut} variant="outline" size="sm" className="h-8 w-8 p-0" title="Sign out">
+                <LogOut className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
@@ -187,7 +192,13 @@ const Index = () => {
         templates={templates}
         maxTemplates={maxTemplates}
         onSaveTemplate={saveTemplate}
-        onLoadTemplate={(entries) => { clearSchedule(); entries.forEach((c) => { const { id, ...rest } = c; addClass(rest); }); }}
+        onLoadTemplate={async (entries) => {
+          await clearSchedule();
+          for (const c of entries) {
+            const { id, ...rest } = c;
+            await addClass(rest);
+          }
+        }}
         onDeleteTemplate={deleteTemplate}
       />
     </div>
