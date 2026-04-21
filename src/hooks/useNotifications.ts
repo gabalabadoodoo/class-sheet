@@ -1,20 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ClassEntry, parseTime, DAYS, DayOfWeek } from "@/lib/schedule-data";
+import { ClassEntry, parseTime, DayOfWeek } from "@/lib/schedule-data";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NotificationSettings {
   enabled: boolean;
   minutesBefore: number;
 }
 
-const STORAGE_KEY = "schedule-notifications";
-
-function getSettings(): NotificationSettings {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch {}
-  return { enabled: false, minutesBefore: 10 };
-}
+const DEFAULTS: NotificationSettings = { enabled: false, minutesBefore: 10 };
 
 function getCurrentDayOfWeek(): DayOfWeek | null {
   const jsDay = new Date().getDay();
@@ -25,13 +19,38 @@ function getCurrentDayOfWeek(): DayOfWeek | null {
 }
 
 export function useNotifications(classes: ClassEntry[]) {
-  const [settings, setSettings] = useState<NotificationSettings>(getSettings);
+  const { user } = useAuth();
+  const [settings, setSettings] = useState<NotificationSettings>(DEFAULTS);
   const firedRef = useRef<Set<string>>(new Set());
 
-  const saveSettings = (s: NotificationSettings) => {
+  // Load settings from cloud
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("user_settings")
+        .select("notifications_enabled, minutes_before")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+      setSettings({
+        enabled: data.notifications_enabled,
+        minutesBefore: data.minutes_before,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const persist = useCallback(async (s: NotificationSettings) => {
     setSettings(s);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-  };
+    if (!user) return;
+    await supabase.from("user_settings").upsert({
+      user_id: user.id,
+      notifications_enabled: s.enabled,
+      minutes_before: s.minutesBefore,
+    });
+  }, [user]);
 
   const toggleEnabled = useCallback(async () => {
     if (!settings.enabled) {
@@ -41,18 +60,18 @@ export function useNotifications(classes: ClassEntry[]) {
       }
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
-        saveSettings({ ...settings, enabled: true });
+        await persist({ ...settings, enabled: true });
       } else {
         alert("Notification permission denied. Please enable it in your browser settings.");
       }
     } else {
-      saveSettings({ ...settings, enabled: false });
+      await persist({ ...settings, enabled: false });
     }
-  }, [settings]);
+  }, [settings, persist]);
 
   const setMinutesBefore = useCallback((mins: number) => {
-    saveSettings({ ...settings, minutesBefore: mins });
-  }, [settings]);
+    persist({ ...settings, minutesBefore: mins });
+  }, [settings, persist]);
 
   useEffect(() => {
     if (!settings.enabled) return;
@@ -60,18 +79,15 @@ export function useNotifications(classes: ClassEntry[]) {
     const check = () => {
       const today = getCurrentDayOfWeek();
       if (!today) return;
-
       const now = new Date();
       const nowDecimal = now.getHours() + now.getMinutes() / 60;
       const dateKey = now.toDateString();
-
       const todayClasses = classes.filter((c) => c.day === today);
 
       todayClasses.forEach((c) => {
         const start = parseTime(c.startTime);
         const diffMinutes = (start - nowDecimal) * 60;
         const key = `${c.id}-${dateKey}`;
-
         if (diffMinutes > 0 && diffMinutes <= settings.minutesBefore && !firedRef.current.has(key)) {
           firedRef.current.add(key);
           new Notification(`📚 ${c.className} starts in ${Math.round(diffMinutes)} min`, {
