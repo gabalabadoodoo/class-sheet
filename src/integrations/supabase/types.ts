@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      classes: {
+        Row: {
+          class_id: string
+          class_name: string
+          color: string | null
+          created_at: string
+          day: string
+          end_time: string
+          id: string
+          location: string
+          meeting_link: string | null
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          class_id: string
+          class_name: string
+          color?: string | null
+          created_at?: string
+          day: string
+          end_time: string
+          id?: string
+          location: string
+          meeting_link?: string | null
+          start_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          class_id?: string
+          class_name?: string
+          color?: string | null
+          created_at?: string
+          day?: string
+          end_time?: string
+          id?: string
+          location?: string
+          meeting_link?: string | null
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      schedule_templates: {
+        Row: {
+          classes: Json
+          id: string
+          name: string
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          classes: Json
+          id?: string
+          name: string
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          classes?: Json
+          id?: string
+          name?: string
+          saved_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          minutes_before: number
+          notifications_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          minutes_before?: number
+          notifications_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          minutes_before?: number
+          notifications_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
