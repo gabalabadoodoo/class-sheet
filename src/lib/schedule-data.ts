@@ -13,8 +13,7 @@ export interface ClassEntry {
 }
 
 export const CLASS_COLORS: Record<string, string> = {
-  "AppDev LEC": "hsl(210, 70%, 50%)",
-  "AppDev LAB": "hsl(210, 70%, 40%)",
+  "AppDev": "hsl(210, 70%, 50%)",
   "Techno": "hsl(340, 65%, 50%)",
   "NetComm 1": "hsl(160, 60%, 40%)",
   "Automata": "hsl(270, 55%, 50%)",
@@ -22,6 +21,20 @@ export const CLASS_COLORS: Record<string, string> = {
   "Python": "hsl(50, 75%, 45%)",
   "PurComm": "hsl(0, 65%, 50%)",
 };
+
+// Strip trailing " LEC" / " LAB" (case-insensitive) so lec & lab share the same color.
+function normalizeClassName(name: string): string {
+  return name.replace(/\s+(LEC|LAB)\s*$/i, "").trim();
+}
+
+// Stable hash → HSL fallback so unknown subjects also get a consistent color
+// (and both their LEC/LAB variants match each other).
+function hashColor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0;
+  const hue = Math.abs(h) % 360;
+  return `hsl(${hue}, 65%, 48%)`;
+}
 
 export const DAYS: DayOfWeek[] = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
@@ -51,5 +64,6 @@ export function parseTime(time: string): number {
 }
 
 export function getClassColor(className: string): string {
-  return CLASS_COLORS[className] || "hsl(200, 50%, 50%)";
+  const base = normalizeClassName(className);
+  return CLASS_COLORS[base] || CLASS_COLORS[className] || hashColor(base);
 }
