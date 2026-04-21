@@ -192,7 +192,13 @@ const Index = () => {
         templates={templates}
         maxTemplates={maxTemplates}
         onSaveTemplate={saveTemplate}
-        onLoadTemplate={(entries) => { clearSchedule(); entries.forEach((c) => { const { id, ...rest } = c; addClass(rest); }); }}
+        onLoadTemplate={async (entries) => {
+          await clearSchedule();
+          for (const c of entries) {
+            const { id, ...rest } = c;
+            await addClass(rest);
+          }
+        }}
         onDeleteTemplate={deleteTemplate}
       />
     </div>
