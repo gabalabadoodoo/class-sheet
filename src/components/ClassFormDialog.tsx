@@ -126,41 +126,18 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
             </div>
           )}
 
-          <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
-            <div>
-              <Label htmlFor="combined-mode" className="cursor-pointer">Combined time range</Label>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                One field, e.g. <span className="font-mono">17:00:00-18:50:00</span>
-              </p>
-            </div>
-            <Switch id="combined-mode" checked={combinedMode} onCheckedChange={setCombinedMode} />
+          <div className="space-y-2">
+            <Label>Time Range</Label>
+            <Input
+              value={rangeInput}
+              onChange={(e) => setRangeInput(e.target.value)}
+              placeholder="17:00:00-18:50:00"
+              className="font-mono"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Accepts <span className="font-mono">17:00:00-18:50:00</span>, <span className="font-mono">9am-10:30am</span>, <span className="font-mono">0700-0950</span>, <span className="font-mono">7pm-9:50pm</span>
+            </p>
           </div>
-
-          {combinedMode ? (
-            <div className="space-y-2">
-              <Label>Start – End</Label>
-              <Input
-                value={rangeInput}
-                onChange={(e) => setRangeInput(e.target.value)}
-                placeholder="17:00:00-18:50:00"
-                className="font-mono"
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Accepts <span className="font-mono">17:00:00-18:50:00</span>, <span className="font-mono">9am-10:30am</span>, <span className="font-mono">0700-0950</span>
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Start Time</Label>
-                <Input {...register("startTime", { required: true })} placeholder="9am, 21:00, 2100" />
-              </div>
-              <div className="space-y-2">
-                <Label>End Time</Label>
-                <Input {...register("endTime", { required: true })} placeholder="9pm, 700, 7:30 AM" />
-              </div>
-            </div>
-          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
