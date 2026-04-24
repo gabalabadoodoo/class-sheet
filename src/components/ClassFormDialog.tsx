@@ -21,17 +21,13 @@ interface ClassFormDialogProps {
 }
 
 export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, prefill }: ClassFormDialogProps) {
-  const { register, handleSubmit, reset, setValue, watch, getValues } = useForm<Omit<ClassEntry, "id">>({
+  const { register, handleSubmit, reset, setValue, watch } = useForm<Omit<ClassEntry, "id">>({
     defaultValues: {
       className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM", meetingLink: "",
     },
   });
 
   const watchLocation = watch("location");
-  const watchStart = watch("startTime");
-  const watchEnd = watch("endTime");
-
-  const [combinedMode, setCombinedMode] = useState(false);
   const [rangeInput, setRangeInput] = useState("");
 
   useEffect(() => {
@@ -46,6 +42,7 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
         endTime: initialData.endTime,
         meetingLink: initialData.meetingLink || "",
       });
+      setRangeInput(toRangeString(initialData.startTime, initialData.endTime) || "");
     } else if (prefill) {
       reset({
         className: prefill.className || "",
@@ -57,46 +54,24 @@ export function ClassFormDialog({ open, onOpenChange, onSubmit, initialData, pre
         endTime: prefill.endTime || "8:00 AM",
         meetingLink: prefill.meetingLink || "",
       });
+      setRangeInput(toRangeString(prefill.startTime || "7:00 AM", prefill.endTime || "8:00 AM") || "");
     } else {
       reset({ className: "", classId: "", section: "TS21", day: "MONDAY", location: "", startTime: "7:00 AM", endTime: "8:00 AM", meetingLink: "" });
+      setRangeInput("");
     }
   }, [initialData, prefill, reset, open]);
 
-  // When switching INTO combined mode, prefill the combined string from current values.
-  useEffect(() => {
-    if (combinedMode) {
-      const v = getValues();
-      setRangeInput(toRangeString(v.startTime, v.endTime) || "");
-    }
-  }, [combinedMode, getValues, watchStart, watchEnd]);
-
   const onFormSubmit = (data: Omit<ClassEntry, "id">) => {
-    let startTime = data.startTime;
-    let endTime = data.endTime;
-
-    if (combinedMode) {
-      const range = parseTimeRange(rangeInput);
-      if (!range) {
-        toast.error("Invalid time range. Try 17:00:00-18:50:00 or 9am-10:30am");
-        return;
-      }
-      startTime = range.start;
-      endTime = range.end;
-    } else {
-      const s = parseFlexibleTime(data.startTime);
-      const e = parseFlexibleTime(data.endTime);
-      if (!s || !e) {
-        toast.error("Invalid time. Try 9am, 21:00, 2100, or 7:30 PM");
-        return;
-      }
-      startTime = s;
-      endTime = e;
+    const range = parseTimeRange(rangeInput);
+    if (!range) {
+      toast.error("Invalid time range. Try 17:00:00-18:50:00 or 9am-10:30am");
+      return;
     }
 
     const submitted = {
       ...data,
-      startTime,
-      endTime,
+      startTime: range.start,
+      endTime: range.end,
       section: data.section || "TS21",
     };
     if (submitted.location !== "ONLINE") {
