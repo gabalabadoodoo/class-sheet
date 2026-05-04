@@ -197,6 +197,13 @@ const Index = () => {
         }}
         onDeleteTemplate={deleteTemplate}
       />
+
+      <ClassFormDialog
+        open={quickEditOpen}
+        onOpenChange={(open) => { setQuickEditOpen(open); if (!open) setEditingEntry(null); }}
+        onSubmit={(data) => { if (editingEntry) updateClass(editingEntry.id, data); }}
+        initialData={editingEntry}
+      />
     </div>
   );
 };
