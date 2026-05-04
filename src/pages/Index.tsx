@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, Bell, BellOff, LogOut } from "lucide-react";
-import { useNotifications } from "@/hooks/useNotifications";
+import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, LogOut } from "lucide-react";
+import { ClassFormDialog } from "@/components/ClassFormDialog";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -23,7 +23,8 @@ const Index = () => {
   const [managerOpen, setManagerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"mobile" | "desktop">("mobile");
   const [editMode, setEditMode] = useState(false);
-  const { settings: notifSettings, toggleEnabled: toggleNotifications } = useNotifications(classes);
+  const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
+  const [quickEditOpen, setQuickEditOpen] = useState(false);
   const { templates, saveTemplate, deleteTemplate, maxTemplates } = useTemplates();
 
   const filtered = useMemo(() => {
@@ -42,6 +43,11 @@ const Index = () => {
 
   const handleEdit = (entry: ClassEntry) => {
     setManagerOpen(true);
+  };
+
+  const handleCalendarEdit = (entry: ClassEntry) => {
+    setEditingEntry(entry);
+    setQuickEditOpen(true);
   };
 
   const containerClass = viewMode === "desktop" ? "max-w-5xl" : "max-w-lg";
@@ -67,16 +73,6 @@ const Index = () => {
               >
                 {editMode ? <Pencil className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 {editMode ? "Editing" : "Viewing"}
-              </Button>
-              {/* Notifications toggle */}
-              <Button
-                onClick={toggleNotifications}
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
-                title={notifSettings.enabled ? "Disable notifications" : "Enable notifications"}
-              >
-                {notifSettings.enabled ? <Bell className="h-3.5 w-3.5 text-primary" /> : <BellOff className="h-3.5 w-3.5" />}
               </Button>
               {/* View mode toggle */}
               <Button
@@ -146,7 +142,7 @@ const Index = () => {
               </Select>
             </div>
             <div className="rounded-lg border border-border bg-card p-2">
-              <CalendarView classes={filtered} onEdit={handleEdit} editMode={editMode} />
+              <CalendarView classes={filtered} onEdit={handleCalendarEdit} editMode={editMode} />
             </div>
           </TabsContent>
 
@@ -200,6 +196,13 @@ const Index = () => {
           }
         }}
         onDeleteTemplate={deleteTemplate}
+      />
+
+      <ClassFormDialog
+        open={quickEditOpen}
+        onOpenChange={(open) => { setQuickEditOpen(open); if (!open) setEditingEntry(null); }}
+        onSubmit={(data) => { if (editingEntry) updateClass(editingEntry.id, data); }}
+        initialData={editingEntry}
       />
     </div>
   );
