@@ -23,7 +23,8 @@ const Index = () => {
   const [managerOpen, setManagerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"mobile" | "desktop">("mobile");
   const [editMode, setEditMode] = useState(false);
-  const { settings: notifSettings, toggleEnabled: toggleNotifications } = useNotifications(classes);
+  const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
+  const [quickEditOpen, setQuickEditOpen] = useState(false);
   const { templates, saveTemplate, deleteTemplate, maxTemplates } = useTemplates();
 
   const filtered = useMemo(() => {
