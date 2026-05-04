@@ -142,7 +142,7 @@ const Index = () => {
               </Select>
             </div>
             <div className="rounded-lg border border-border bg-card p-2">
-              <CalendarView classes={filtered} onEdit={handleEdit} editMode={editMode} />
+              <CalendarView classes={filtered} onEdit={handleCalendarEdit} editMode={editMode} />
             </div>
           </TabsContent>
 
