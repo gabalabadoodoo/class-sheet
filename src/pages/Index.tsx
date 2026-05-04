@@ -45,6 +45,11 @@ const Index = () => {
     setManagerOpen(true);
   };
 
+  const handleCalendarEdit = (entry: ClassEntry) => {
+    setEditingEntry(entry);
+    setQuickEditOpen(true);
+  };
+
   const containerClass = viewMode === "desktop" ? "max-w-5xl" : "max-w-lg";
 
   return (
