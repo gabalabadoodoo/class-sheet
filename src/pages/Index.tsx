@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, Bell, BellOff, LogOut } from "lucide-react";
-import { useNotifications } from "@/hooks/useNotifications";
+import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartphone, Eye, Pencil, LogOut } from "lucide-react";
+import { ClassFormDialog } from "@/components/ClassFormDialog";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useAuth } from "@/contexts/AuthContext";
 
