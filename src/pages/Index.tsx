@@ -69,16 +69,6 @@ const Index = () => {
                 {editMode ? <Pencil className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 {editMode ? "Editing" : "Viewing"}
               </Button>
-              {/* Notifications toggle */}
-              <Button
-                onClick={toggleNotifications}
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
-                title={notifSettings.enabled ? "Disable notifications" : "Enable notifications"}
-              >
-                {notifSettings.enabled ? <Bell className="h-3.5 w-3.5 text-primary" /> : <BellOff className="h-3.5 w-3.5" />}
-              </Button>
               {/* View mode toggle */}
               <Button
                 onClick={() => setViewMode(viewMode === "mobile" ? "desktop" : "mobile")}
