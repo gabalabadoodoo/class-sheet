@@ -9,6 +9,7 @@ interface DbClass {
   user_id: string;
   class_name: string;
   class_id: string;
+  section: string;
   day: string;
   start_time: string;
   end_time: string;
@@ -24,7 +25,7 @@ function rowToEntry(row: DbClass): ClassEntry {
     id: row.id,
     className: row.class_name,
     classId: row.class_id,
-    section: "",
+    section: row.section ?? "",
     day: row.day as DayOfWeek,
     location: row.location,
     startTime: row.start_time,
@@ -38,6 +39,7 @@ function entryToRow(entry: Omit<ClassEntry, "id">, userId: string) {
     user_id: userId,
     class_name: entry.className,
     class_id: entry.classId,
+    section: entry.section || "TS21",
     day: entry.day,
     start_time: entry.startTime,
     end_time: entry.endTime,
