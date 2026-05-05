@@ -122,7 +122,7 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
                         {entry.className}
                       </span>
                       <span className="text-[10px] font-mono text-muted-foreground shrink-0">
-                        {entry.classId}
+                        {entry.classId}{entry.section ? ` · ${entry.section}` : ""}
                       </span>
                     </div>
                     {status === "active" && (
@@ -145,7 +145,7 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
                       {isOnline ? <Wifi className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
                       {entry.location}
                     </span>
-                    <span className="text-[10px] font-mono">{entry.section}</span>
+                    
                   </div>
 
                   {/* Join Link for online classes */}
