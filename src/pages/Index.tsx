@@ -42,7 +42,8 @@ const Index = () => {
   }, [classes, search, dayFilter, locationFilter]);
 
   const handleEdit = (entry: ClassEntry) => {
-    setManagerOpen(true);
+    setEditingEntry(entry);
+    setQuickEditOpen(true);
   };
 
   const handleCalendarEdit = (entry: ClassEntry) => {
