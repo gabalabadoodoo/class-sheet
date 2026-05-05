@@ -122,7 +122,7 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
                         {entry.className}
                       </span>
                       <span className="text-[10px] font-mono text-muted-foreground shrink-0">
-                        {entry.classId}{entry.section ? ` · ${entry.section}` : ""}
+                        {entry.classId} - {entry.section || "TS21"}
                       </span>
                     </div>
                     {status === "active" && (
