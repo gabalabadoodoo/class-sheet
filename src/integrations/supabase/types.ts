@@ -25,6 +25,7 @@ export type Database = {
           id: string
           location: string
           meeting_link: string | null
+          section: string
           start_time: string
           updated_at: string
           user_id: string
@@ -39,6 +40,7 @@ export type Database = {
           id?: string
           location: string
           meeting_link?: string | null
+          section?: string
           start_time: string
           updated_at?: string
           user_id: string
@@ -53,6 +55,7 @@ export type Database = {
           id?: string
           location?: string
           meeting_link?: string | null
+          section?: string
           start_time?: string
           updated_at?: string
           user_id?: string
