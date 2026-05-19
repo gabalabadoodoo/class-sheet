@@ -36,6 +36,7 @@ function getCurrentTimeDecimal(): number {
 export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
   const [now, setNow] = useState(getCurrentTimeDecimal);
   const today = getCurrentDayOfWeek();
+  const tomorrow = getTomorrowDayOfWeek();
 
   useEffect(() => {
     const interval = setInterval(() => setNow(getCurrentTimeDecimal()), 30_000);
@@ -46,6 +47,10 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
     .filter((c) => c.day === today)
     .sort((a, b) => parseTime(a.startTime) - parseTime(b.startTime));
 
+  const tomorrowClasses = classes
+    .filter((c) => c.day === tomorrow)
+    .sort((a, b) => parseTime(a.startTime) - parseTime(b.startTime));
+
   const getStatus = (entry: ClassEntry) => {
     const start = parseTime(entry.startTime);
     const end = parseTime(entry.endTime);
@@ -54,31 +59,100 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
     return "done";
   };
 
-  if (!today) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="text-4xl mb-3">🎉</p>
-        <p className="text-lg font-semibold text-foreground">No classes today!</p>
-        <p className="text-sm text-muted-foreground mt-1">Enjoy your weekend.</p>
-      </div>
-    );
-  }
-
-  if (todayClasses.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="text-4xl mb-3">✨</p>
-        <p className="text-lg font-semibold text-foreground">Free day!</p>
-        <p className="text-sm text-muted-foreground mt-1">
-          No classes scheduled for {today.charAt(0) + today.slice(1).toLowerCase()}.
-        </p>
-      </div>
-    );
-  }
-
   const formatNow = () => {
     const d = new Date();
     return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  };
+
+  const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+
+  const renderClassCard = (entry: ClassEntry, opts: { preview?: boolean } = {}) => {
+    const status = opts.preview ? "upcoming" : getStatus(entry);
+    const color = getClassColor(entry.className);
+    const isOnline = entry.location === "ONLINE";
+
+    return (
+      <div
+        key={entry.id}
+        onClick={() => editMode && onEdit(entry)}
+        className={`w-full text-left rounded-xl p-3 transition-all border ${
+          editMode ? "cursor-pointer" : "cursor-default"
+        } ${
+          opts.preview
+            ? "border-dashed border-border bg-muted/20"
+            : status === "active"
+            ? "border-primary/40 bg-primary/5 shadow-md ring-2 ring-primary/20"
+            : status === "done"
+            ? "border-border bg-muted/40 opacity-60"
+            : "border-border bg-card hover:bg-accent/50"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className="w-1 self-stretch rounded-full shrink-0 mt-0.5"
+            style={{ backgroundColor: color, opacity: opts.preview ? 0.5 : 1 }}
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-semibold text-sm text-foreground truncate">
+                  {entry.className}
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                  {entry.classId} - {entry.section || "TS21"}
+                </span>
+              </div>
+              {!opts.preview && status === "active" && (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full shrink-0">
+                  Now
+                </span>
+              )}
+              {!opts.preview && status === "done" && (
+                <span className="text-[10px] text-muted-foreground shrink-0">Done</span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {entry.startTime} – {entry.endTime}
+              </span>
+              <span className="flex items-center gap-1">
+                {isOnline ? <Wifi className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
+                {entry.location}
+              </span>
+            </div>
+
+            {!opts.preview && isOnline && (
+              <div className="mt-2">
+                {entry.meetingLink ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1 px-2.5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(entry.meetingLink, "_blank");
+                    }}
+                  >
+                    <ExternalLink className="h-3 w-3" /> Join Link
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1 px-2.5 opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    <ExternalLink className="h-3 w-3" /> Link Unavailable
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -86,111 +160,59 @@ export function TodayView({ classes, onEdit, editMode }: TodayViewProps) {
       {/* Countdown card */}
       <CountdownCard classes={classes} />
 
-      {/* Day header */}
+      {/* Today section */}
       <div className="flex items-center justify-between px-1">
         <h2 className="text-base font-bold text-foreground">
-          {today.charAt(0) + today.slice(1).toLowerCase()}
+          {today ? titleCase(today) : "Today"}
         </h2>
         <span className="text-xs text-muted-foreground flex items-center gap-1">
           <Clock className="h-3 w-3" /> {formatNow()}
         </span>
       </div>
 
-      {/* Class cards */}
-      <div className="space-y-2">
-        {todayClasses.map((entry) => {
-          const status = getStatus(entry);
-          const color = getClassColor(entry.className);
-          const isOnline = entry.location === "ONLINE";
+      {!today ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <p className="text-3xl mb-2">🎉</p>
+          <p className="text-sm font-semibold text-foreground">No classes today!</p>
+          <p className="text-xs text-muted-foreground mt-1">Enjoy your weekend.</p>
+        </div>
+      ) : todayClasses.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <p className="text-3xl mb-2">✨</p>
+          <p className="text-sm font-semibold text-foreground">Free day!</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            No classes scheduled for {titleCase(today)}.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {todayClasses.map((entry) => renderClassCard(entry))}
+        </div>
+      )}
 
-          return (
-            <div
-              key={entry.id}
-              onClick={() => editMode && onEdit(entry)}
-              className={`w-full text-left rounded-xl p-3 transition-all border ${
-                editMode ? "cursor-pointer" : "cursor-default"
-              } ${
-                status === "active"
-                  ? "border-primary/40 bg-primary/5 shadow-md ring-2 ring-primary/20"
-                  : status === "done"
-                  ? "border-border bg-muted/40 opacity-60"
-                  : "border-border bg-card hover:bg-accent/50"
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                {/* Color bar */}
-                <div
-                  className="w-1 self-stretch rounded-full shrink-0 mt-0.5"
-                  style={{ backgroundColor: color }}
-                />
-
-                <div className="flex-1 min-w-0">
-                  {/* Title row */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-semibold text-sm text-foreground truncate">
-                        {entry.className}
-                      </span>
-                      <span className="text-[10px] font-mono text-muted-foreground shrink-0">
-                        {entry.classId} - {entry.section || "TS21"}
-                      </span>
-                    </div>
-                    {status === "active" && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full shrink-0">
-                        Now
-                      </span>
-                    )}
-                    {status === "done" && (
-                      <span className="text-[10px] text-muted-foreground shrink-0">Done</span>
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {entry.startTime} – {entry.endTime}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      {isOnline ? <Wifi className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
-                      {entry.location}
-                    </span>
-                    
-                  </div>
-
-                  {/* Join Link for online classes */}
-                  {isOnline && (
-                    <div className="mt-2">
-                      {entry.meetingLink ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs gap-1 px-2.5"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(entry.meetingLink, "_blank");
-                          }}
-                        >
-                          <ExternalLink className="h-3 w-3" /> Join Link
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs gap-1 px-2.5 opacity-50 cursor-not-allowed"
-                          disabled
-                        >
-                          <ExternalLink className="h-3 w-3" /> Link Unavailable
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+      {/* Tomorrow preview */}
+      {tomorrow && (
+        <div className="pt-2">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Tomorrow · {titleCase(tomorrow)}
+            </h3>
+            <span className="text-[10px] text-muted-foreground">
+              {tomorrowClasses.length} {tomorrowClasses.length === 1 ? "class" : "classes"}
+            </span>
+          </div>
+          {tomorrowClasses.length === 0 ? (
+            <p className="text-xs text-muted-foreground px-1 py-3 text-center border border-dashed border-border rounded-xl bg-muted/10">
+              No classes scheduled.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {tomorrowClasses.map((entry) => renderClassCard(entry, { preview: true }))}
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
