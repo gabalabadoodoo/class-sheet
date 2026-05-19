@@ -10,8 +10,18 @@ interface TodayViewProps {
   editMode: boolean;
 }
 
+const DAY_ORDER: DayOfWeek[] = ["SUNDAY" as DayOfWeek, "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
 function getCurrentDayOfWeek(): DayOfWeek | null {
   const jsDay = new Date().getDay(); // 0=Sun, 1=Mon...
+  const map: Record<number, DayOfWeek> = {
+    1: "MONDAY", 2: "TUESDAY", 3: "WEDNESDAY", 4: "THURSDAY", 5: "FRIDAY", 6: "SATURDAY",
+  };
+  return map[jsDay] || null;
+}
+
+function getTomorrowDayOfWeek(): DayOfWeek | null {
+  const jsDay = (new Date().getDay() + 1) % 7;
   const map: Record<number, DayOfWeek> = {
     1: "MONDAY", 2: "TUESDAY", 3: "WEDNESDAY", 4: "THURSDAY", 5: "FRIDAY", 6: "SATURDAY",
   };
