@@ -10,7 +10,7 @@ interface TodayViewProps {
   editMode: boolean;
 }
 
-const DAY_ORDER: DayOfWeek[] = ["SUNDAY" as DayOfWeek, "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
 
 function getCurrentDayOfWeek(): DayOfWeek | null {
   const jsDay = new Date().getDay(); // 0=Sun, 1=Mon...
