@@ -14,6 +14,21 @@ import { ClassFormDialog } from "@/components/ClassFormDialog";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useAuth } from "@/contexts/AuthContext";
 
+const VIEW_MODE_COOKIE = "viewMode";
+
+function readViewModeCookie(): "mobile" | "desktop" {
+  if (typeof document === "undefined") return "mobile";
+  const match = document.cookie.match(new RegExp(`(?:^|; )${VIEW_MODE_COOKIE}=([^;]*)`));
+  const val = match?.[1];
+  return val === "desktop" || val === "mobile" ? val : "mobile";
+}
+
+function writeViewModeCookie(value: "mobile" | "desktop") {
+  if (typeof document === "undefined") return;
+  // 1 year
+  document.cookie = `${VIEW_MODE_COOKIE}=${value}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+}
+
 const Index = () => {
   const { classes, addClass, updateClass, deleteClass, resetSchedule, clearSchedule } = useSchedule();
   const { signOut } = useAuth();
@@ -21,11 +36,17 @@ const Index = () => {
   const [dayFilter, setDayFilter] = useState<string>("ALL");
   const [locationFilter, setLocationFilter] = useState<string>("ALL");
   const [managerOpen, setManagerOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"mobile" | "desktop">("mobile");
+  const [viewMode, setViewMode] = useState<"mobile" | "desktop">(readViewModeCookie);
   const [editMode, setEditMode] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
   const [quickEditOpen, setQuickEditOpen] = useState(false);
   const { templates, saveTemplate, deleteTemplate, maxTemplates } = useTemplates();
+
+  const handleViewModeToggle = () => {
+    const next = viewMode === "mobile" ? "desktop" : "mobile";
+    setViewMode(next);
+    writeViewModeCookie(next);
+  };
 
   const filtered = useMemo(() => {
     return classes.filter((c) => {
@@ -77,7 +98,7 @@ const Index = () => {
               </Button>
               {/* View mode toggle */}
               <Button
-                onClick={() => setViewMode(viewMode === "mobile" ? "desktop" : "mobile")}
+                onClick={handleViewModeToggle}
                 variant="outline"
                 size="sm"
                 className="h-8 w-8 p-0"
