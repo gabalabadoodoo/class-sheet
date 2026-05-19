@@ -98,7 +98,7 @@ const Index = () => {
               </Button>
               {/* View mode toggle */}
               <Button
-                onClick={() => setViewMode(viewMode === "mobile" ? "desktop" : "mobile")}
+                onClick={handleViewModeToggle}
                 variant="outline"
                 size="sm"
                 className="h-8 w-8 p-0"
