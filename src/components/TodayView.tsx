@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ClassEntry, DAYS, DayOfWeek, parseTime, getClassColor } from "@/lib/schedule-data";
+import { ClassEntry, DayOfWeek, parseTime, getClassColor } from "@/lib/schedule-data";
 import { MapPin, Clock, Wifi, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CountdownCard } from "@/components/CountdownCard";
