@@ -150,6 +150,9 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
                 <Button onClick={() => setImportOpen(true)} variant="outline" size="sm" className="h-8 text-xs gap-1">
                   <Upload className="h-3.5 w-3.5" /> Import
                 </Button>
+                <Button onClick={() => setCsvImportOpen(true)} variant="outline" size="sm" className="h-8 text-xs gap-1">
+                  <FileSpreadsheet className="h-3.5 w-3.5" /> CSV
+                </Button>
                 <Button onClick={() => setClearAllOpen(true)} variant="destructive" size="sm" className="h-8 text-xs gap-1" disabled={classes.length === 0}>
                   <Trash2 className="h-3.5 w-3.5" /> Clear All
                 </Button>
