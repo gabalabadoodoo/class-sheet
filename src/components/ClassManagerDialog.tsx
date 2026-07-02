@@ -425,6 +425,13 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
         onOpenChange={setImportOpen}
         onImport={(entries) => entries.forEach((e) => onAdd(e))}
       />
+
+      {/* CSV import dialog */}
+      <CsvImportDialog
+        open={csvImportOpen}
+        onOpenChange={setCsvImportOpen}
+        onImport={(entries) => entries.forEach((e) => onAdd(e))}
+      />
     </>
   );
 }
