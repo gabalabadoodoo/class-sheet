@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload, Save, FolderOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload, Save, FolderOpen, FileSpreadsheet } from "lucide-react";
 import { ImportScheduleDialog } from "@/components/ImportScheduleDialog";
+import { CsvImportDialog } from "@/components/CsvImportDialog";
 import { toast } from "sonner";
 
 interface ClassManagerDialogProps {
@@ -42,6 +43,7 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [clearAllOpen, setClearAllOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [showTemplates, setShowTemplates] = useState(false);
   const [saveTemplateName, setSaveTemplateName] = useState("");
@@ -147,6 +149,9 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
               <div className="flex gap-1.5">
                 <Button onClick={() => setImportOpen(true)} variant="outline" size="sm" className="h-8 text-xs gap-1">
                   <Upload className="h-3.5 w-3.5" /> Import
+                </Button>
+                <Button onClick={() => setCsvImportOpen(true)} variant="outline" size="sm" className="h-8 text-xs gap-1">
+                  <FileSpreadsheet className="h-3.5 w-3.5" /> CSV
                 </Button>
                 <Button onClick={() => setClearAllOpen(true)} variant="destructive" size="sm" className="h-8 text-xs gap-1" disabled={classes.length === 0}>
                   <Trash2 className="h-3.5 w-3.5" /> Clear All
@@ -418,6 +423,13 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
       <ImportScheduleDialog
         open={importOpen}
         onOpenChange={setImportOpen}
+        onImport={(entries) => entries.forEach((e) => onAdd(e))}
+      />
+
+      {/* CSV import dialog */}
+      <CsvImportDialog
+        open={csvImportOpen}
+        onOpenChange={setCsvImportOpen}
         onImport={(entries) => entries.forEach((e) => onAdd(e))}
       />
     </>
