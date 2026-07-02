@@ -43,6 +43,7 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [clearAllOpen, setClearAllOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [showTemplates, setShowTemplates] = useState(false);
   const [saveTemplateName, setSaveTemplateName] = useState("");
