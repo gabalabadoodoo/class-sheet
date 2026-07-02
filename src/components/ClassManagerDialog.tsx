@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload, Save, FolderOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, FlaskConical, ChevronDown, ChevronRight, AlertTriangle, Upload, Save, FolderOpen, FileSpreadsheet } from "lucide-react";
 import { ImportScheduleDialog } from "@/components/ImportScheduleDialog";
+import { CsvImportDialog } from "@/components/CsvImportDialog";
 import { toast } from "sonner";
 
 interface ClassManagerDialogProps {
