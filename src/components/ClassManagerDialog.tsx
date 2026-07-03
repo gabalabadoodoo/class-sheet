@@ -39,7 +39,7 @@ interface GroupedClass {
   entries: ClassEntry[];
 }
 
-export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onClearAll, templates, maxTemplates, onSaveTemplate, onLoadTemplate, onDeleteTemplate }: ClassManagerDialogProps) {
+export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onDeleteImmediate, onClearAll, templates, maxTemplates, onSaveTemplate, onLoadTemplate, onDeleteTemplate }: ClassManagerDialogProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
   const [prefill, setPrefill] = useState<Partial<Omit<ClassEntry, "id">> | null>(null);
