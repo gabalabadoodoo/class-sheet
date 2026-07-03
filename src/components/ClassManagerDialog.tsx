@@ -22,7 +22,10 @@ interface ClassManagerDialogProps {
   classes: ClassEntry[];
   onAdd: (data: Omit<ClassEntry, "id">) => void;
   onUpdate: (id: string, data: Omit<ClassEntry, "id">) => void;
+  /** User-initiated delete (shows Undo toast). */
   onDelete: (id: string) => void;
+  /** Programmatic delete without undo (used by CSV Replace flow). */
+  onDeleteImmediate: (id: string) => Promise<void> | void;
   onClearAll: () => void;
   templates: ScheduleTemplate[];
   maxTemplates: number;
