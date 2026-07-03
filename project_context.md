@@ -63,8 +63,10 @@ Index (page)
 │   └── TableView
 ├── ClassManagerDialog
 │   ├── ClassFormDialog (add/edit inside manager)
-│   └── ImportScheduleDialog (paste-OCR importer)
+│   ├── ImportScheduleDialog (paste-OCR importer)
+│   └── CsvImportDialog (CSV upload importer)
 └── ClassFormDialog (top-level "quick edit" opened by tapping a class in edit mode)
+
 ```
 
 ---
@@ -152,11 +154,37 @@ Index (page)
 - **File**: `src/components/ClassFormDialog.tsx`.
 - **State**: `react-hook-form`; on submit calls the parent's `onSubmit(data)` which routes to `addClass` or `updateClass` in `useSchedule`.
 
-### 3.12 Import from text (OCR paste)
+### 3.12 CSV import
+- **Function**: Upload a CSV file exported from a school enrollment system, preview the parsed classes, edit auto-generated names and time ranges, then confirm to import into the schedule.
+- **Required CSV header**: `Courses,Title,Section,Units,Days,Time,Room`.
+- **Parser logic** (`src/lib/csv-import.ts`):
+  - Reads CSV with quoted-field support.
+  - Skips duplicate course codes across the file.
+  - Groups rows by base course code: a row whose course code ends in `L` (e.g., `CCS0043L`) is merged as the **LAB** variant under the same class as the non-`L` row (e.g., `CCS0043` lecture).
+  - Splits `Days`, `Time`, and `Room` on ` / ` to support multiple slots per row.
+  - Validates that the three segments have matching counts after splitting; warns if not.
+  - Maps day tokens (`M`, `T`, `W`, `TH`, `F`, `S`, etc.) to `DayOfWeek`.
+  - Parses each time segment through `parseTimeRange` (handles `07:00:00-09:40:00`, `9am-10:30am`, `2100-1900`, etc.).
+  - Auto-generates a short, editable class name from the `Title` via `abbreviateTitle` (strips `(LEC)`/`(LAB)` and stops on common words).
+- **Preview/edit dialog** (`src/components/CsvImportDialog.tsx`):
+  - Drag/choose file upload.
+  - Lists each parsed class with editable class name, lecture code, lab code, section, and each schedule's day, location, and time range.
+  - Per-class warning badges.
+  - Global warning list (e.g., duplicate course codes, mismatched segment counts).
+  - **Confirm Import** only writes to the database after the user edits and confirms; **Cancel** discards everything.
+- **Edge cases handled**:
+  - Mismatched `Days / Time / Room` segment counts → warning on that class.
+  - Duplicate course codes → skipped globally with a warning.
+  - More than two schedules after grouping → still displayed and flagged for review.
+  - Unparseable time ranges → caught at confirm time and reported as a toast error.
+- **Files**: `src/lib/csv-import.ts`, `src/components/CsvImportDialog.tsx`, wired into `src/components/ClassManagerDialog.tsx` via a **CSV** button.
+
+### 3.13 Import from text (OCR paste)
 - **Function**: Paste plain text copied from a schedule photo/OCR; parser extracts entries; preview list; import to DB.
 - **File**: `src/components/ImportScheduleDialog.tsx`.
+- **Note**: This is the older, heuristic importer. The CSV importer is preferred for structured exports.
 
-### 3.13 Schedule templates (backup system)
+### 3.14 Schedule templates (backup system)
 - **Function**: Save up to **3** named snapshots of the current schedule; load one (replaces current) or delete it.
 - **Files**: `src/hooks/useTemplates.ts`, integrated into `ClassManagerDialog.tsx`.
 - **User flow**:
@@ -165,21 +193,21 @@ Index (page)
   - Delete: confirm → deletes row.
 - **Constants**: `MAX_TEMPLATES = 3`.
 
-### 3.14 Reset schedule
+### 3.15 Reset schedule
 - **Function**: Header reset button wipes current user's classes and re-inserts `DEFAULT_SCHEDULE`.
 - **Impl**: `useSchedule.resetSchedule()`.
 
-### 3.15 Search + filters
+### 3.16 Search + filters
 - **Function**: Client-side filtering. `search` matches class name or ID (case-insensitive); `dayFilter` filters Week view; `locationFilter` filters Table view.
 - **State**: local `useState` in `Index.tsx`; `filtered` memoized.
 
-### 3.16 Cross-device sync
+### 3.17 Cross-device sync
 - All CRUD writes hit Supabase directly. Other devices see updates on next page load / refresh (no realtime subscription is wired; adding one would be a `.channel('classes').on('postgres_changes', …)` on top of `useSchedule`).
 
-### 3.17 Class colors (LEC/LAB share color)
+### 3.18 Class colors (LEC/LAB share color)
 - `getClassColor(className)` strips a trailing " LEC"/" LAB", looks up `CLASS_COLORS`, and falls back to a stable string-hashed HSL — so `AppDev LEC` and `AppDev LAB` always render the same color.
 
-### 3.18 Notifications hook (present, not wired to UI)
+### 3.19 Notifications hook (present, not wired to UI)
 - `src/hooks/useNotifications.ts` still exists and reads/writes `user_settings`. The header button was **removed** on user request; hook remains as dead-but-safe code for future re-enable. Do not rewire without asking.
 
 ---
@@ -279,6 +307,7 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 - **Time storage is stringly-typed** (`"7:00 AM"`). Parsing lives in `parseTime` (`schedule-data.ts`) and `parseFlexibleTime`/`parseTimeRange` (`time-format.ts`). Any new time-consuming code must go through these helpers.
 - **Section defaulting**: empty section input → stored as `'TS21'` (see `entryToRow`). UI additionally falls back to `'TS21'` on display when the field is empty (belt-and-braces).
 - **`ImportScheduleDialog`** uses a heuristic parser — brittle on unexpected OCR formats. No test coverage.
+- **CSV import is intentionally strict**: it expects the exact header `Courses,Title,Section,Units,Days,Time,Room` and groups lecture/lab rows by trailing `L`. It warns on duplicates and mismatched multi-slot segments, but it will still import rows with >2 schedules if the user confirms.
 - **Testing**: `vitest` is configured (`src/test/example.test.ts` only). No component or hook tests for the schedule logic.
 - **SEO/meta**: `index.html` should already have app-specific `<title>` and `<meta name="description">`; verify before publishing changes.
 - **README** is a stub (`TODO: Document your project here`).
@@ -301,6 +330,7 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 | Templates CRUD | `src/hooks/useTemplates.ts` |
 | Notifications (unused) | `src/hooks/useNotifications.ts` |
 | Views | `src/components/TodayView.tsx`, `CalendarView.tsx`, `TableView.tsx`, `CountdownCard.tsx` |
-| Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx` |
+| Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx`, `CsvImportDialog.tsx` |
+| CSV import | `src/lib/csv-import.ts` |
 | Supabase client (auto-gen — don't edit) | `src/integrations/supabase/client.ts`, `src/integrations/supabase/types.ts` |
 | Design tokens | `src/index.css`, `tailwind.config.ts` |
