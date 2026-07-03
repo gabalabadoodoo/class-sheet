@@ -13,6 +13,7 @@ import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartpho
 import { ClassFormDialog } from "@/components/ClassFormDialog";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useAuth } from "@/contexts/AuthContext";
+import { deleteWithUndo } from "@/lib/delete-with-undo";
 
 const VIEW_MODE_COOKIE = "viewMode";
 
