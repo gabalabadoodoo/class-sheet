@@ -212,7 +212,8 @@ const Index = () => {
         classes={classes}
         onAdd={addClass}
         onUpdate={updateClass}
-        onDelete={deleteClass}
+        onDelete={handleDeleteWithUndo}
+        onDeleteImmediate={deleteClass}
         onClearAll={clearSchedule}
         templates={templates}
         maxTemplates={maxTemplates}
