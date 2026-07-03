@@ -430,7 +430,19 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
       <CsvImportDialog
         open={csvImportOpen}
         onOpenChange={setCsvImportOpen}
-        onImport={(entries) => entries.forEach((e) => onAdd(e))}
+        existingClasses={classes}
+        onImport={async (entries, replaceIds) => {
+          // Delete any classes whose classId matches a "Replace" selection.
+          if (replaceIds.length) {
+            const upper = new Set(replaceIds.map((c) => c.toUpperCase()));
+            for (const c of classes) {
+              if (upper.has(c.classId.toUpperCase())) {
+                await onDelete(c.id);
+              }
+            }
+          }
+          for (const e of entries) await onAdd(e);
+        }}
       />
     </>
   );
