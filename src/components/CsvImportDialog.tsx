@@ -214,6 +214,15 @@ export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport 
               </div>
             )}
 
+            {conflictCount > 0 && (
+              <div className="bg-primary/5 border border-primary/30 text-foreground text-xs rounded-md p-2 flex items-center gap-2">
+                <AlertTriangle className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span>
+                  {conflictCount} class{conflictCount === 1 ? "" : "es"} already exist{conflictCount === 1 ? "s" : ""} — review below and choose <em>Skip</em> or <em>Replace</em>.
+                </span>
+              </div>
+            )}
+
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 -mr-1">
               {drafts.length === 0 && (
                 <p className="text-center text-muted-foreground text-sm py-6">No classes to import.</p>
