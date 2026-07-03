@@ -102,12 +102,19 @@ export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport 
 
   const handleConfirm = () => {
     if (!drafts) return;
-    // Convert back to ParsedClass shape, validating each rangeInput
     const parsed: ParsedClass[] = [];
+    const replaceIds: string[] = [];
     const errors: string[] = [];
     for (const c of drafts) {
+      // Filter schedules by per-code conflict action.
+      const keptSchedules = c.schedules.filter((s) => {
+        if (s.type === "LECTURE") return c.lectureAction !== "skip";
+        return c.labAction !== "skip";
+      });
+      if (keptSchedules.length === 0) continue;
+
       const schedules: ParsedClass["schedules"] = [];
-      for (const s of c.schedules) {
+      for (const s of keptSchedules) {
         const range = parseTimeRange(s.rangeInput);
         if (!range) {
           errors.push(`${c.className}: invalid time range "${s.rangeInput}"`);
@@ -126,6 +133,9 @@ export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport 
           rawDay: s.day, rawTime: s.rangeInput, rawRoom: s.location,
         });
       }
+      if (c.lectureAction === "replace") replaceIds.push(c.lectureCode.trim());
+      if (c.labAction === "replace" && c.labCode.trim()) replaceIds.push(c.labCode.trim());
+
       parsed.push({
         key: c.key,
         className: c.className.trim(),
@@ -142,8 +152,15 @@ export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport 
       return;
     }
     const entries = parsedToEntries(parsed);
-    onImport(entries);
-    toast.success(`Imported ${entries.length} schedule${entries.length === 1 ? "" : "s"} across ${parsed.length} class${parsed.length === 1 ? "" : "es"}`);
+    onImport(entries, replaceIds);
+    const skippedCount = drafts.reduce(
+      (n, c) => n + (c.lectureAction === "skip" ? 1 : 0) + (c.labAction === "skip" ? 1 : 0),
+      0,
+    );
+    const parts = [`Imported ${entries.length} schedule${entries.length === 1 ? "" : "s"}`];
+    if (replaceIds.length) parts.push(`replaced ${replaceIds.length}`);
+    if (skippedCount) parts.push(`skipped ${skippedCount}`);
+    toast.success(parts.join(" · "));
     reset();
     onOpenChange(false);
   };
