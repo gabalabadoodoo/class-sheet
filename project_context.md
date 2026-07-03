@@ -65,8 +65,8 @@ Index (page)
 │   ├── ClassFormDialog (add/edit inside manager)
 │   ├── ImportScheduleDialog (paste-OCR importer)
 │   └── CsvImportDialog (CSV upload importer)
-
 └── ClassFormDialog (top-level "quick edit" opened by tapping a class in edit mode)
+
 ```
 
 ---
