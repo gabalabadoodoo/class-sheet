@@ -353,7 +353,8 @@ export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport 
                           </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
