@@ -22,7 +22,10 @@ interface ClassManagerDialogProps {
   classes: ClassEntry[];
   onAdd: (data: Omit<ClassEntry, "id">) => void;
   onUpdate: (id: string, data: Omit<ClassEntry, "id">) => void;
+  /** User-initiated delete (shows Undo toast). */
   onDelete: (id: string) => void;
+  /** Programmatic delete without undo (used by CSV Replace flow). */
+  onDeleteImmediate: (id: string) => Promise<void> | void;
   onClearAll: () => void;
   templates: ScheduleTemplate[];
   maxTemplates: number;
@@ -36,7 +39,7 @@ interface GroupedClass {
   entries: ClassEntry[];
 }
 
-export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onClearAll, templates, maxTemplates, onSaveTemplate, onLoadTemplate, onDeleteTemplate }: ClassManagerDialogProps) {
+export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdate, onDelete, onDeleteImmediate, onClearAll, templates, maxTemplates, onSaveTemplate, onLoadTemplate, onDeleteTemplate }: ClassManagerDialogProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ClassEntry | null>(null);
   const [prefill, setPrefill] = useState<Partial<Omit<ClassEntry, "id">> | null>(null);
@@ -430,7 +433,18 @@ export function ClassManagerDialog({ open, onOpenChange, classes, onAdd, onUpdat
       <CsvImportDialog
         open={csvImportOpen}
         onOpenChange={setCsvImportOpen}
-        onImport={(entries) => entries.forEach((e) => onAdd(e))}
+        existingClasses={classes}
+        onImport={async (entries, replaceIds) => {
+          if (replaceIds.length) {
+            const upper = new Set(replaceIds.map((c) => c.toUpperCase()));
+            for (const c of classes) {
+              if (upper.has(c.classId.toUpperCase())) {
+                await onDeleteImmediate(c.id);
+              }
+            }
+          }
+          for (const e of entries) await onAdd(e);
+        }}
       />
     </>
   );

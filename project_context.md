@@ -207,8 +207,8 @@ Index (page)
 ### 3.18 Class colors (LEC/LAB share color)
 - `getClassColor(className)` strips a trailing " LEC"/" LAB", looks up `CLASS_COLORS`, and falls back to a stable string-hashed HSL — so `AppDev LEC` and `AppDev LAB` always render the same color.
 
-### 3.19 Notifications hook (present, not wired to UI)
-- `src/hooks/useNotifications.ts` still exists and reads/writes `user_settings`. The header button was **removed** on user request; hook remains as dead-but-safe code for future re-enable. Do not rewire without asking.
+### 3.19 Delete-with-Undo
+- `src/lib/delete-with-undo.ts` wraps `deleteClass` + `addClass` with a 5s `sonner` toast offering Undo. Used at every user-initiated delete call site (TableView, ClassManagerDialog). CSV Replace flow bypasses this via `onDeleteImmediate` for atomic behavior.
 
 ---
 

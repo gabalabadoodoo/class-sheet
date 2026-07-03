@@ -27,15 +27,24 @@ interface EditableClass {
   labCode: string;
   schedules: EditableSchedule[];
   warnings: string[];
+  /** Conflict resolution per code: "skip" (default) or "replace" */
+  lectureAction: "skip" | "replace" | null; // null = no conflict
+  labAction: "skip" | "replace" | null;
 }
 
 interface CsvImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (entries: Array<Omit<ClassEntry, "id">>) => void;
+  existingClasses: ClassEntry[];
+  onImport: (
+    entries: Array<Omit<ClassEntry, "id">>,
+    replaceClassIds: string[],
+  ) => void;
 }
 
-function toEditable(p: ParsedClass): EditableClass {
+function toEditable(p: ParsedClass, existingIds: Set<string>): EditableClass {
+  const lecConflict = existingIds.has(p.lectureCode.toUpperCase());
+  const labConflict = p.labCode ? existingIds.has(p.labCode.toUpperCase()) : false;
   return {
     key: p.key,
     className: p.className,
@@ -49,13 +58,21 @@ function toEditable(p: ParsedClass): EditableClass {
       location: s.location,
       rangeInput: toRangeString(s.startTime, s.endTime),
     })),
+    lectureAction: lecConflict ? "skip" : null,
+    labAction: labConflict ? "skip" : null,
   };
 }
 
-export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialogProps) {
+export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport }: CsvImportDialogProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [drafts, setDrafts] = useState<EditableClass[] | null>(null);
   const [globalWarnings, setGlobalWarnings] = useState<string[]>([]);
+
+  const existingIds = new Set(existingClasses.map((c) => c.classId.toUpperCase()));
+  const conflictCount = drafts?.reduce(
+    (n, c) => n + (c.lectureAction ? 1 : 0) + (c.labAction ? 1 : 0),
+    0,
+  ) ?? 0;
 
   const reset = () => { setDrafts(null); setGlobalWarnings([]); if (fileRef.current) fileRef.current.value = ""; };
 
@@ -66,7 +83,7 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
       toast.error(globalWarnings[0] || "Could not parse CSV");
       return;
     }
-    setDrafts(classes.map(toEditable));
+    setDrafts(classes.map((c) => toEditable(c, existingIds)));
     setGlobalWarnings(globalWarnings);
   };
 
@@ -85,12 +102,19 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
 
   const handleConfirm = () => {
     if (!drafts) return;
-    // Convert back to ParsedClass shape, validating each rangeInput
     const parsed: ParsedClass[] = [];
+    const replaceIds: string[] = [];
     const errors: string[] = [];
     for (const c of drafts) {
+      // Filter schedules by per-code conflict action.
+      const keptSchedules = c.schedules.filter((s) => {
+        if (s.type === "LECTURE") return c.lectureAction !== "skip";
+        return c.labAction !== "skip";
+      });
+      if (keptSchedules.length === 0) continue;
+
       const schedules: ParsedClass["schedules"] = [];
-      for (const s of c.schedules) {
+      for (const s of keptSchedules) {
         const range = parseTimeRange(s.rangeInput);
         if (!range) {
           errors.push(`${c.className}: invalid time range "${s.rangeInput}"`);
@@ -109,6 +133,9 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
           rawDay: s.day, rawTime: s.rangeInput, rawRoom: s.location,
         });
       }
+      if (c.lectureAction === "replace") replaceIds.push(c.lectureCode.trim());
+      if (c.labAction === "replace" && c.labCode.trim()) replaceIds.push(c.labCode.trim());
+
       parsed.push({
         key: c.key,
         className: c.className.trim(),
@@ -125,8 +152,15 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
       return;
     }
     const entries = parsedToEntries(parsed);
-    onImport(entries);
-    toast.success(`Imported ${entries.length} schedule${entries.length === 1 ? "" : "s"} across ${parsed.length} class${parsed.length === 1 ? "" : "es"}`);
+    onImport(entries, replaceIds);
+    const skippedCount = drafts.reduce(
+      (n, c) => n + (c.lectureAction === "skip" ? 1 : 0) + (c.labAction === "skip" ? 1 : 0),
+      0,
+    );
+    const parts = [`Imported ${entries.length} schedule${entries.length === 1 ? "" : "s"}`];
+    if (replaceIds.length) parts.push(`replaced ${replaceIds.length}`);
+    if (skippedCount) parts.push(`skipped ${skippedCount}`);
+    toast.success(parts.join(" · "));
     reset();
     onOpenChange(false);
   };
@@ -177,6 +211,15 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
                 {globalWarnings.map((w, i) => (
                   <div key={i} className="flex gap-1.5"><AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" /><span>{w}</span></div>
                 ))}
+              </div>
+            )}
+
+            {conflictCount > 0 && (
+              <div className="bg-primary/5 border border-primary/30 text-foreground text-xs rounded-md p-2 flex items-center gap-2">
+                <AlertTriangle className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span>
+                  {conflictCount} class{conflictCount === 1 ? "" : "es"} already exist{conflictCount === 1 ? "s" : ""} — review below and choose <em>Skip</em> or <em>Replace</em>.
+                </span>
               </div>
             )}
 
@@ -245,12 +288,38 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
                   )}
 
                   <div className="space-y-2">
-                    {c.schedules.map((s, si) => (
+                    {c.schedules.map((s, si) => {
+                      const action = s.type === "LECTURE" ? c.lectureAction : c.labAction;
+                      const conflictCode = s.type === "LECTURE" ? c.lectureCode : c.labCode;
+                      return (
                       <div key={si} className="bg-muted/40 rounded-md p-2 space-y-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${s.type === "LAB" ? "bg-accent text-accent-foreground" : "bg-primary/15 text-primary"}`}>
                             {s.type}
                           </span>
+                          {action && (
+                            <>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded font-semibold bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <AlertTriangle className="h-2.5 w-2.5" /> Already exists: {conflictCode}
+                              </span>
+                              <div className="flex gap-1 ml-auto">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant={action === "skip" ? "default" : "outline"}
+                                  className="h-6 px-2 text-[10px]"
+                                  onClick={() => updateClass(ci, s.type === "LECTURE" ? { lectureAction: "skip" } : { labAction: "skip" })}
+                                >Skip</Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant={action === "replace" ? "default" : "outline"}
+                                  className="h-6 px-2 text-[10px]"
+                                  onClick={() => updateClass(ci, s.type === "LECTURE" ? { lectureAction: "replace" } : { labAction: "replace" })}
+                                >Replace</Button>
+                              </div>
+                            </>
+                          )}
                           <div className="flex-1" />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
@@ -284,7 +353,8 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
                           </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}

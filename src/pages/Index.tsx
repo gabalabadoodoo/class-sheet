@@ -13,6 +13,7 @@ import { Search, CalendarDays, List, RotateCcw, Sun, Settings, Monitor, Smartpho
 import { ClassFormDialog } from "@/components/ClassFormDialog";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useAuth } from "@/contexts/AuthContext";
+import { deleteWithUndo } from "@/lib/delete-with-undo";
 
 const VIEW_MODE_COOKIE = "viewMode";
 
@@ -70,6 +71,12 @@ const Index = () => {
   const handleCalendarEdit = (entry: ClassEntry) => {
     setEditingEntry(entry);
     setQuickEditOpen(true);
+  };
+
+  const handleDeleteWithUndo = (id: string) => {
+    const entry = classes.find((c) => c.id === id);
+    if (!entry) return;
+    deleteWithUndo(entry, deleteClass, addClass);
   };
 
   const containerClass = viewMode === "desktop" ? "max-w-5xl" : "max-w-lg";
@@ -192,7 +199,7 @@ const Index = () => {
               </Select>
             </div>
             <div className="rounded-lg border border-border bg-card overflow-x-auto">
-              <TableView classes={filtered} onEdit={handleEdit} onDelete={(id) => deleteClass(id)} editMode={editMode} />
+              <TableView classes={filtered} onEdit={handleEdit} onDelete={handleDeleteWithUndo} editMode={editMode} />
             </div>
           </TabsContent>
         </Tabs>
@@ -205,7 +212,8 @@ const Index = () => {
         classes={classes}
         onAdd={addClass}
         onUpdate={updateClass}
-        onDelete={deleteClass}
+        onDelete={handleDeleteWithUndo}
+        onDeleteImmediate={deleteClass}
         onClearAll={clearSchedule}
         templates={templates}
         maxTemplates={maxTemplates}
