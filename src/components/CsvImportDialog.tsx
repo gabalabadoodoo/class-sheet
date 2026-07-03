@@ -42,7 +42,9 @@ interface CsvImportDialogProps {
   ) => void;
 }
 
-function toEditable(p: ParsedClass): EditableClass {
+function toEditable(p: ParsedClass, existingIds: Set<string>): EditableClass {
+  const lecConflict = existingIds.has(p.lectureCode.toUpperCase());
+  const labConflict = p.labCode ? existingIds.has(p.labCode.toUpperCase()) : false;
   return {
     key: p.key,
     className: p.className,
@@ -56,13 +58,21 @@ function toEditable(p: ParsedClass): EditableClass {
       location: s.location,
       rangeInput: toRangeString(s.startTime, s.endTime),
     })),
+    lectureAction: lecConflict ? "skip" : null,
+    labAction: labConflict ? "skip" : null,
   };
 }
 
-export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialogProps) {
+export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport }: CsvImportDialogProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [drafts, setDrafts] = useState<EditableClass[] | null>(null);
   const [globalWarnings, setGlobalWarnings] = useState<string[]>([]);
+
+  const existingIds = new Set(existingClasses.map((c) => c.classId.toUpperCase()));
+  const conflictCount = drafts?.reduce(
+    (n, c) => n + (c.lectureAction ? 1 : 0) + (c.labAction ? 1 : 0),
+    0,
+  ) ?? 0;
 
   const reset = () => { setDrafts(null); setGlobalWarnings([]); if (fileRef.current) fileRef.current.value = ""; };
 
@@ -73,7 +83,7 @@ export function CsvImportDialog({ open, onOpenChange, onImport }: CsvImportDialo
       toast.error(globalWarnings[0] || "Could not parse CSV");
       return;
     }
-    setDrafts(classes.map(toEditable));
+    setDrafts(classes.map((c) => toEditable(c, existingIds)));
     setGlobalWarnings(globalWarnings);
   };
 
