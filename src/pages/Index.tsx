@@ -73,6 +73,12 @@ const Index = () => {
     setQuickEditOpen(true);
   };
 
+  const handleDeleteWithUndo = (id: string) => {
+    const entry = classes.find((c) => c.id === id);
+    if (!entry) return;
+    deleteWithUndo(entry, deleteClass, addClass);
+  };
+
   const containerClass = viewMode === "desktop" ? "max-w-5xl" : "max-w-lg";
 
   return (
