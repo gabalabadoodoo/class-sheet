@@ -63,7 +63,9 @@ Index (page)
 │   └── TableView
 ├── ClassManagerDialog
 │   ├── ClassFormDialog (add/edit inside manager)
-│   └── ImportScheduleDialog (paste-OCR importer)
+│   ├── ImportScheduleDialog (paste-OCR importer)
+│   └── CsvImportDialog (CSV upload importer)
+
 └── ClassFormDialog (top-level "quick edit" opened by tapping a class in edit mode)
 ```
 
@@ -305,6 +307,7 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 - **Time storage is stringly-typed** (`"7:00 AM"`). Parsing lives in `parseTime` (`schedule-data.ts`) and `parseFlexibleTime`/`parseTimeRange` (`time-format.ts`). Any new time-consuming code must go through these helpers.
 - **Section defaulting**: empty section input → stored as `'TS21'` (see `entryToRow`). UI additionally falls back to `'TS21'` on display when the field is empty (belt-and-braces).
 - **`ImportScheduleDialog`** uses a heuristic parser — brittle on unexpected OCR formats. No test coverage.
+- **CSV import is intentionally strict**: it expects the exact header `Courses,Title,Section,Units,Days,Time,Room` and groups lecture/lab rows by trailing `L`. It warns on duplicates and mismatched multi-slot segments, but it will still import rows with >2 schedules if the user confirms.
 - **Testing**: `vitest` is configured (`src/test/example.test.ts` only). No component or hook tests for the schedule logic.
 - **SEO/meta**: `index.html` should already have app-specific `<title>` and `<meta name="description">`; verify before publishing changes.
 - **README** is a stub (`TODO: Document your project here`).
@@ -327,6 +330,7 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 | Templates CRUD | `src/hooks/useTemplates.ts` |
 | Notifications (unused) | `src/hooks/useNotifications.ts` |
 | Views | `src/components/TodayView.tsx`, `CalendarView.tsx`, `TableView.tsx`, `CountdownCard.tsx` |
-| Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx` |
+| Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx`, `CsvImportDialog.tsx` |
+| CSV import | `src/lib/csv-import.ts` |
 | Supabase client (auto-gen — don't edit) | `src/integrations/supabase/client.ts`, `src/integrations/supabase/types.ts` |
 | Design tokens | `src/index.css`, `tailwind.config.ts` |
