@@ -86,27 +86,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_settings: {
-        Row: {
-          minutes_before: number
-          notifications_enabled: boolean
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          minutes_before?: number
-          notifications_enabled?: boolean
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          minutes_before?: number
-          notifications_enabled?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
