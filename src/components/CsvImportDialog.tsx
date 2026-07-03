@@ -27,12 +27,19 @@ interface EditableClass {
   labCode: string;
   schedules: EditableSchedule[];
   warnings: string[];
+  /** Conflict resolution per code: "skip" (default) or "replace" */
+  lectureAction: "skip" | "replace" | null; // null = no conflict
+  labAction: "skip" | "replace" | null;
 }
 
 interface CsvImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (entries: Array<Omit<ClassEntry, "id">>) => void;
+  existingClasses: ClassEntry[];
+  onImport: (
+    entries: Array<Omit<ClassEntry, "id">>,
+    replaceClassIds: string[],
+  ) => void;
 }
 
 function toEditable(p: ParsedClass): EditableClass {
