@@ -199,7 +199,7 @@ const Index = () => {
               </Select>
             </div>
             <div className="rounded-lg border border-border bg-card overflow-x-auto">
-              <TableView classes={filtered} onEdit={handleEdit} onDelete={(id) => deleteClass(id)} editMode={editMode} />
+              <TableView classes={filtered} onEdit={handleEdit} onDelete={handleDeleteWithUndo} editMode={editMode} />
             </div>
           </TabsContent>
         </Tabs>
