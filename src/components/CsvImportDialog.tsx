@@ -288,12 +288,38 @@ export function CsvImportDialog({ open, onOpenChange, existingClasses, onImport 
                   )}
 
                   <div className="space-y-2">
-                    {c.schedules.map((s, si) => (
+                    {c.schedules.map((s, si) => {
+                      const action = s.type === "LECTURE" ? c.lectureAction : c.labAction;
+                      const conflictCode = s.type === "LECTURE" ? c.lectureCode : c.labCode;
+                      return (
                       <div key={si} className="bg-muted/40 rounded-md p-2 space-y-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${s.type === "LAB" ? "bg-accent text-accent-foreground" : "bg-primary/15 text-primary"}`}>
                             {s.type}
                           </span>
+                          {action && (
+                            <>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded font-semibold bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <AlertTriangle className="h-2.5 w-2.5" /> Already exists: {conflictCode}
+                              </span>
+                              <div className="flex gap-1 ml-auto">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant={action === "skip" ? "default" : "outline"}
+                                  className="h-6 px-2 text-[10px]"
+                                  onClick={() => updateClass(ci, s.type === "LECTURE" ? { lectureAction: "skip" } : { labAction: "skip" })}
+                                >Skip</Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant={action === "replace" ? "default" : "outline"}
+                                  className="h-6 px-2 text-[10px]"
+                                  onClick={() => updateClass(ci, s.type === "LECTURE" ? { lectureAction: "replace" } : { labAction: "replace" })}
+                                >Replace</Button>
+                              </div>
+                            </>
+                          )}
                           <div className="flex-1" />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
