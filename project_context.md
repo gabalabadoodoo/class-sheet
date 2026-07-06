@@ -267,15 +267,6 @@ RLS policies (all scoped by `auth.uid() = user_id`): `SELECT`, `INSERT`, `UPDATE
 
 Same RLS pattern as above. Max 3 enforced client-side.
 
-### Table `public.user_settings`
-| Column | Type | Notes |
-|---|---|---|
-| `user_id` | uuid PK | owner |
-| `notifications_enabled` | boolean | default `false` |
-| `minutes_before` | integer | default `10` |
-| `updated_at` | timestamptz | default `now()` |
-
-RLS scoped by `auth.uid() = user_id`. Only consumed by the (currently unwired) notifications hook.
 
 ### DB functions / triggers
 - `public.set_updated_at()` — trigger function for updating `updated_at`. No explicit triggers listed at time of writing; `updated_at` on `classes` is written by the client through `entryToRow` on updates (Supabase timestamp default handles the rest).
