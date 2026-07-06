@@ -267,8 +267,8 @@ RLS policies (all scoped by `auth.uid() = user_id`): `SELECT`, `INSERT`, `UPDATE
 
 Same RLS pattern as above. Max 3 enforced client-side.
 
-
 ### DB functions / triggers
+
 - `public.set_updated_at()` — trigger function for updating `updated_at`. No explicit triggers listed at time of writing; `updated_at` on `classes` is written by the client through `entryToRow` on updates (Supabase timestamp default handles the rest).
 
 ### Edge functions
