@@ -141,10 +141,10 @@ Index (page)
 - **Clear All**: confirmation dialog → `clearSchedule()` deletes every row for the user.
 - **Import Schedule**: opens `ImportScheduleDialog` for paste-based OCR-style import.
 - **Templates section** (see 3.14).
-
 - **File**: `src/components/ClassManagerDialog.tsx`.
 
 ### 3.11 ClassFormDialog (add / edit)
+
 - **Function**: The form used to add or edit a single class.
 - **Fields**:
   - Class name
