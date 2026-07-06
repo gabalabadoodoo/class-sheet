@@ -325,8 +325,8 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 - **Testing**: `vitest` is configured (`src/test/example.test.ts` only). No component or hook tests for the schedule logic.
 - **SEO/meta**: `index.html` has app-specific `<title>`, `<meta name="description">`, Open Graph, and Twitter card tags. Verified.
 - **README** is a stub (`TODO: Document your project here`).
-
 - **No password reset / no Google OAuth / no email verification UX flow.**
+
 - **`useSchedule` refetches happen only via the initial effect and after each mutation** — no `refresh` is called on window focus.
 - **Cookie for view mode** is device-local by design (not synced). This is intentional per user preference.
 
