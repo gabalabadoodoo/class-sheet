@@ -147,7 +147,6 @@ Index (page)
 - **Function**: The form used to add or edit a single class.
 - **Fields**:
   - Class name
-
   - Class ID
   - Section (defaults to `TS21` if left blank — normalized in `useSchedule.entryToRow`)
   - Day (`MONDAY`–`SATURDAY`)
@@ -315,7 +314,6 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 - **No realtime sync.** Updates on one device only appear on other devices after refresh. Adding realtime would be a `supabase.channel(...).on('postgres_changes', ...)` subscription inside `useSchedule` and (optionally) `useTemplates`.
 - **`classes.color` column unused.** Colors are derived from `className` via `getClassColor`. If per-class custom colors are added later, this column is the intended storage.
 - **Default schedule is hard-coded** in `src/lib/schedule-data.ts` (`DEFAULT_SCHEDULE`, 14 entries specific to one student's TS21 section). Anyone else who signs up gets these as their initial schedule until they Reset/Clear/Edit.
-
 - **First-run seeding uses `localStorage`** (`uni-schedule-seeded-<userId>`). If a user clears storage on a new device with an empty DB, they'd re-seed — acceptable but worth knowing.
 - **Time storage is stringly-typed** (`"7:00 AM"`). Parsing lives in `parseTime` (`schedule-data.ts`) and `parseFlexibleTime`/`parseTimeRange` (`time-format.ts`). Any new time-consuming code must go through these helpers.
 - **Section defaulting**: empty section input → stored as `'TS21'` (see `entryToRow`). UI additionally falls back to `'TS21'` on display when the field is empty (belt-and-braces).
@@ -325,7 +323,6 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 - **SEO/meta**: `index.html` has app-specific `<title>`, `<meta name="description">`, Open Graph, and Twitter card tags. Verified.
 - **README** is a stub (`TODO: Document your project here`).
 - **No password reset / no Google OAuth / no email verification UX flow.**
-
 - **`useSchedule` refetches happen only via the initial effect and after each mutation** — no `refresh` is called on window focus.
 - **Cookie for view mode** is device-local by design (not synced). This is intentional per user preference.
 
