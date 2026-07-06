@@ -191,8 +191,8 @@ Index (page)
 ### 3.13 Import from text (OCR paste)
 - **Function**: Paste plain text copied from a schedule photo/OCR; parser extracts entries; preview list; import to DB.
 - **File**: `src/components/ImportScheduleDialog.tsx`.
-
 - **Note**: This is the older, heuristic importer. The CSV importer is preferred for structured exports.
+
 
 ### 3.14 Schedule templates (backup system)
 - **Function**: Save up to **3** named snapshots of the current schedule; load one (replaces current) or delete it.
