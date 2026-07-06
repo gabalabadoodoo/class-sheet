@@ -144,8 +144,8 @@ Index (page)
 - **File**: `src/components/ClassManagerDialog.tsx`.
 
 ### 3.11 ClassFormDialog (add / edit)
-
 - **Function**: The form used to add or edit a single class.
+
 - **Fields**:
   - Class name
   - Class ID
