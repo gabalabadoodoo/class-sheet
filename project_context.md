@@ -231,8 +231,8 @@ Index (page)
   - Production published origin → installable, standalone display, cached app shell.
   - Lovable preview / dev iframe → service worker intentionally unregistered so live reload and preview updates keep working.
 
-
 ---
+
 
 ## 4. Database Schema & Data Models
 
