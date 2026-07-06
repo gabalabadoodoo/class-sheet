@@ -36,8 +36,8 @@ A **personal university class schedule web app** for a single student user. User
 
 ### Entry points
 - `src/main.tsx` — mounts `<App />`.
-
 - `src/App.tsx` — sets up `QueryClientProvider`, `TooltipProvider`, `Toaster`, `Sonner`, `BrowserRouter`, `AuthProvider`, then routes.
+
 
 ### Route map
 | Path | Component | Guard | Purpose |
