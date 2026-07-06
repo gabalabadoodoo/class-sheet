@@ -346,8 +346,8 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 | Delete-with-Undo | `src/lib/delete-with-undo.ts` (used by `Index.tsx`) |
 | PWA manifest / service worker | `public/manifest.webmanifest`, `public/sw.js`, `public/icon-512.png`, `index.html`, `src/main.tsx` |
 | Views | `src/components/TodayView.tsx`, `CalendarView.tsx`, `TableView.tsx`, `CountdownCard.tsx` |
-
 | Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx`, `CsvImportDialog.tsx` |
+
 | CSV import | `src/lib/csv-import.ts` |
 | Supabase client (auto-gen — don't edit) | `src/integrations/supabase/client.ts`, `src/integrations/supabase/types.ts` |
 | Design tokens | `src/index.css`, `tailwind.config.ts` |
