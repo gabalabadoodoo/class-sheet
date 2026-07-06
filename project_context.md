@@ -161,25 +161,32 @@ Index (page)
 - **Required CSV header**: `Courses,Title,Section,Units,Days,Time,Room`.
 - **Parser logic** (`src/lib/csv-import.ts`):
   - Reads CSV with quoted-field support.
-  - Skips duplicate course codes across the file.
+  - Skips duplicate course codes within the uploaded file.
   - Groups rows by base course code: a row whose course code ends in `L` (e.g., `CCS0043L`) is merged as the **LAB** variant under the same class as the non-`L` row (e.g., `CCS0043` lecture).
   - Splits `Days`, `Time`, and `Room` on ` / ` to support multiple slots per row.
   - Validates that the three segments have matching counts after splitting; warns if not.
   - Maps day tokens (`M`, `T`, `W`, `TH`, `F`, `S`, etc.) to `DayOfWeek`.
   - Parses each time segment through `parseTimeRange` (handles `07:00:00-09:40:00`, `9am-10:30am`, `2100-1900`, etc.).
   - Auto-generates a short, editable class name from the `Title` via `abbreviateTitle` (strips `(LEC)`/`(LAB)` and stops on common words).
+- **Conflict resolution against existing classes** (`src/components/CsvImportDialog.tsx`):
+  - Before showing the preview, the dialog compares every incoming lecture/lab code against the current user's existing `class_id`s.
+  - Conflicting codes are flagged with **Already exists** badges and default to **Skip**.
+  - The user can toggle each conflict to **Skip** (ignore that code) or **Replace** (delete the existing DB entry and import the new one).
+  - On confirm, the parent receives the list of entries to import plus a list of `class_id`s to replace; `ClassManagerDialog.tsx` routes replacements through `onDeleteImmediate` so the delete + insert happens atomically without an undo toast.
 - **Preview/edit dialog** (`src/components/CsvImportDialog.tsx`):
   - Drag/choose file upload.
   - Lists each parsed class with editable class name, lecture code, lab code, section, and each schedule's day, location, and time range.
   - Per-class warning badges.
-  - Global warning list (e.g., duplicate course codes, mismatched segment counts).
+  - Global warning list (e.g., duplicate course codes within the file, mismatched segment counts).
   - **Confirm Import** only writes to the database after the user edits and confirms; **Cancel** discards everything.
 - **Edge cases handled**:
   - Mismatched `Days / Time / Room` segment counts → warning on that class.
-  - Duplicate course codes → skipped globally with a warning.
+  - Duplicate course codes within the file → skipped globally with a warning.
+  - Duplicate course codes that already exist in the DB → per-code Skip/Replace choice.
   - More than two schedules after grouping → still displayed and flagged for review.
   - Unparseable time ranges → caught at confirm time and reported as a toast error.
 - **Files**: `src/lib/csv-import.ts`, `src/components/CsvImportDialog.tsx`, wired into `src/components/ClassManagerDialog.tsx` via a **CSV** button.
+
 
 ### 3.13 Import from text (OCR paste)
 - **Function**: Paste plain text copied from a schedule photo/OCR; parser extracts entries; preview list; import to DB.
