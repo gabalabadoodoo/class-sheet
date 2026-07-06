@@ -238,8 +238,8 @@ Index (page)
 
 Postgres via Supabase. Every table has `service_role` full access and per-user RLS scoped by `auth.uid() = user_id`.
 
-
 ### Table `public.classes`
+
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid PK | default `gen_random_uuid()` |
