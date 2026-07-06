@@ -146,8 +146,8 @@ Index (page)
 ### 3.11 ClassFormDialog (add / edit)
 - **Function**: The form used to add or edit a single class.
 - **Fields**:
-
   - Class name
+
   - Class ID
   - Section (defaults to `TS21` if left blank — normalized in `useSchedule.entryToRow`)
   - Day (`MONDAY`–`SATURDAY`)
