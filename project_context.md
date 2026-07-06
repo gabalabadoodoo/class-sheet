@@ -274,9 +274,9 @@ Same RLS pattern as above. Max 3 enforced client-side.
 ### Edge functions
 - None currently deployed.
 
-
 ### Storage buckets
 - None.
+
 
 ### TypeScript model
 `src/lib/schedule-data.ts` defines:
