@@ -32,8 +32,8 @@ A **personal university class schedule web app** for a single student user. User
 
 ---
 
-
 ## 2. Application Architecture & Routing
+
 
 ### Entry points
 - `src/main.tsx` — mounts `<App />`.
