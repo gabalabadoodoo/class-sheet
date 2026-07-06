@@ -7,7 +7,7 @@ Onboarding document for LLMs (Claude / Cursor / etc.) taking over maintenance an
 ## 1. Project Overview & Core Stack
 
 ### Purpose
-A **personal university class schedule web app** for a single student user. Users sign in, then manage their weekly class schedule through three synchronized views (Today, Week, Table). All data (classes, templates, settings) is stored per-user in a cloud database (Supabase, surfaced to the user as "Lovable Cloud") and syncs across every device the user logs into. Designed mobile-first for a **Xiaomi 14T** viewport but supports a desktop layout via a toggle.
+A **personal university class schedule web app** for a single student user. Users sign in, then manage their weekly class schedule through three synchronized views (Today, Week, Table). All data (classes and templates) is stored per-user in a cloud database (Supabase, surfaced to the user as "Lovable Cloud") and syncs across every device the user logs into. Designed mobile-first for a **Xiaomi 14T** viewport but supports a desktop layout via a toggle.
 
 ### Tech Stack
 | Layer | Tool |
