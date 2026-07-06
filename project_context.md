@@ -277,8 +277,8 @@ Same RLS pattern as above. Max 3 enforced client-side.
 ### Storage buckets
 - None.
 
-
 ### TypeScript model
+
 `src/lib/schedule-data.ts` defines:
 ```ts
 type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY";
