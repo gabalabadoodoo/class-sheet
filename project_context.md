@@ -193,8 +193,8 @@ Index (page)
 - **File**: `src/components/ImportScheduleDialog.tsx`.
 - **Note**: This is the older, heuristic importer. The CSV importer is preferred for structured exports.
 
-
 ### 3.14 Schedule templates (backup system)
+
 - **Function**: Save up to **3** named snapshots of the current schedule; load one (replaces current) or delete it.
 - **Files**: `src/hooks/useTemplates.ts`, integrated into `ClassManagerDialog.tsx`.
 - **User flow**:
