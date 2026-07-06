@@ -30,8 +30,8 @@ A **personal university class schedule web app** for a single student user. User
 - No native mobile shell (Capacitor/APK was intentionally removed). Web only.
 - The app is **PWA-installable**: `manifest.webmanifest`, `sw.js`, and PWA meta tags are present; production builds register a service worker for app-shell caching. Preview/dev builds intentionally skip registration.
 
-
 ---
+
 
 ## 2. Application Architecture & Routing
 
