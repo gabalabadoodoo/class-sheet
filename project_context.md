@@ -236,8 +236,8 @@ Index (page)
 
 ## 4. Database Schema & Data Models
 
-
 Postgres via Supabase. Every table has `service_role` full access and per-user RLS scoped by `auth.uid() = user_id`.
+
 
 ### Table `public.classes`
 | Column | Type | Notes |
