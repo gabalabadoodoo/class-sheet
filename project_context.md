@@ -28,6 +28,8 @@ A **personal university class schedule web app** for a single student user. User
 - **Never** hardcode Tailwind color utilities like `text-white`, `bg-black`, `bg-[#…]`. All colors come from semantic tokens in `src/index.css`.
 - Class-color palette is defined in `src/lib/schedule-data.ts` (`CLASS_COLORS` + `hashColor` fallback). LEC/LAB variants share one color because `getClassColor` normalizes trailing " LEC"/" LAB".
 - No native mobile shell (Capacitor/APK was intentionally removed). Web only.
+- The app is **PWA-installable**: `manifest.webmanifest`, `sw.js`, and PWA meta tags are present; production builds register a service worker for app-shell caching. Preview/dev builds intentionally skip registration.
+
 
 ---
 
