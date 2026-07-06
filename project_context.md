@@ -342,7 +342,9 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 | Time parsing | `src/lib/time-format.ts` |
 | Schedule CRUD | `src/hooks/useSchedule.ts` |
 | Templates CRUD | `src/hooks/useTemplates.ts` |
-| Notifications (unused) | `src/hooks/useNotifications.ts` |
+| Delete-with-Undo | `src/lib/delete-with-undo.ts` (used by `Index.tsx`) |
+| PWA manifest / service worker | `public/manifest.webmanifest`, `public/sw.js`, `public/icon-512.png`, `index.html`, `src/main.tsx` |
+
 | Views | `src/components/TodayView.tsx`, `CalendarView.tsx`, `TableView.tsx`, `CountdownCard.tsx` |
 | Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx`, `CsvImportDialog.tsx` |
 | CSV import | `src/lib/csv-import.ts` |
