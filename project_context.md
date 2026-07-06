@@ -38,8 +38,8 @@ A **personal university class schedule web app** for a single student user. User
 - `src/main.tsx` — mounts `<App />`.
 - `src/App.tsx` — sets up `QueryClientProvider`, `TooltipProvider`, `Toaster`, `Sonner`, `BrowserRouter`, `AuthProvider`, then routes.
 
-
 ### Route map
+
 | Path | Component | Guard | Purpose |
 |---|---|---|---|
 | `/` | `src/pages/Index.tsx` | `<ProtectedRoute>` (redirects to `/auth` if no session) | Main app: header + tabs (Today / Week / Table) |
