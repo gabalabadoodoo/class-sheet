@@ -187,8 +187,8 @@ Index (page)
   - Unparseable time ranges → caught at confirm time and reported as a toast error.
 - **Files**: `src/lib/csv-import.ts`, `src/components/CsvImportDialog.tsx`, wired into `src/components/ClassManagerDialog.tsx` via a **CSV** button.
 
-
 ### 3.13 Import from text (OCR paste)
+
 - **Function**: Paste plain text copied from a schedule photo/OCR; parser extracts entries; preview list; import to DB.
 - **File**: `src/components/ImportScheduleDialog.tsx`.
 - **Note**: This is the older, heuristic importer. The CSV importer is preferred for structured exports.
