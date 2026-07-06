@@ -320,9 +320,10 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 - **Time storage is stringly-typed** (`"7:00 AM"`). Parsing lives in `parseTime` (`schedule-data.ts`) and `parseFlexibleTime`/`parseTimeRange` (`time-format.ts`). Any new time-consuming code must go through these helpers.
 - **Section defaulting**: empty section input → stored as `'TS21'` (see `entryToRow`). UI additionally falls back to `'TS21'` on display when the field is empty (belt-and-braces).
 - **`ImportScheduleDialog`** uses a heuristic parser — brittle on unexpected OCR formats. No test coverage.
-- **CSV import is intentionally strict**: it expects the exact header `Courses,Title,Section,Units,Days,Time,Room` and groups lecture/lab rows by trailing `L`. It warns on duplicates and mismatched multi-slot segments, but it will still import rows with >2 schedules if the user confirms.
+- **CSV import is intentionally strict**: it expects the exact header `Courses,Title,Section,Units,Days,Time,Room` and groups lecture/lab rows by trailing `L`. It warns on duplicates within the file, mismatched multi-slot segments, and >2 schedules. It also checks each incoming code against the existing DB and offers per-code Skip/Replace before writing anything.
 - **Testing**: `vitest` is configured (`src/test/example.test.ts` only). No component or hook tests for the schedule logic.
-- **SEO/meta**: `index.html` should already have app-specific `<title>` and `<meta name="description">`; verify before publishing changes.
+- **SEO/meta**: `index.html` has app-specific `<title>`, `<meta name="description">`, Open Graph, and Twitter card tags. Verified.
+
 - **README** is a stub (`TODO: Document your project here`).
 - **No password reset / no Google OAuth / no email verification UX flow.**
 - **`useSchedule` refetches happen only via the initial effect and after each mutation** — no `refresh` is called on window focus.
