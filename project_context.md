@@ -219,6 +219,19 @@ Index (page)
 ### 3.19 Delete-with-Undo
 - `src/lib/delete-with-undo.ts` wraps `deleteClass` + `addClass` with a 5s `sonner` toast offering Undo. Used at every user-initiated delete call site (TableView, ClassManagerDialog). CSV Replace flow bypasses this via `onDeleteImmediate` for atomic behavior.
 
+### 3.20 PWA support
+- **Function**: Allow the app to be installed as a standalone app on mobile/desktop and provide offline app-shell caching.
+- **Files**:
+  - `public/manifest.webmanifest` — app metadata (name, short name, icons, theme colors, display mode `standalone`).
+  - `public/icon-512.png` — app icon / Apple touch icon.
+  - `public/sw.js` — minimal service worker: NetworkFirst for navigations/HTML, CacheFirst for hashed `/assets` and static files; versioned cache (`classsheet-v1`).
+  - `index.html` — PWA meta tags (`theme-color`, `viewport-fit=cover`, `apple-mobile-web-app-capable`, manifest link, apple-touch-icon).
+  - `src/main.tsx` — registers `/sw.js` only in production and only on non-preview origins; unregisters any existing worker in preview/dev iframes to avoid stale caching during development.
+- **Behavior**:
+  - Production published origin → installable, standalone display, cached app shell.
+  - Lovable preview / dev iframe → service worker intentionally unregistered so live reload and preview updates keep working.
+
+
 ---
 
 ## 4. Database Schema & Data Models
