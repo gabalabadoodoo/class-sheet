@@ -240,7 +240,6 @@ Postgres via Supabase. Every table has `service_role` full access and per-user R
 
 ### Table `public.classes`
 | Column | Type | Notes |
-
 |---|---|---|
 | `id` | uuid PK | default `gen_random_uuid()` |
 | `user_id` | uuid | owner |
@@ -347,7 +346,6 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 | PWA manifest / service worker | `public/manifest.webmanifest`, `public/sw.js`, `public/icon-512.png`, `index.html`, `src/main.tsx` |
 | Views | `src/components/TodayView.tsx`, `CalendarView.tsx`, `TableView.tsx`, `CountdownCard.tsx` |
 | Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx`, `CsvImportDialog.tsx` |
-
 | CSV import | `src/lib/csv-import.ts` |
 | Supabase client (auto-gen — don't edit) | `src/integrations/supabase/client.ts`, `src/integrations/supabase/types.ts` |
 | Design tokens | `src/index.css`, `tailwind.config.ts` |
