@@ -22,7 +22,7 @@ A **personal university class schedule web app** for a single student user. User
 | Data fetching | `@tanstack/react-query` (provider mounted, but hooks call Supabase directly) |
 | Backend | **Supabase** (Auth + Postgres + RLS). Referred to as "Lovable Cloud" in user-facing copy. |
 | Client | `@supabase/supabase-js` via `src/integrations/supabase/client.ts` (auto-generated, do not edit) |
-| Persistence | Cloud DB for schedule/templates/settings; `localStorage` only for seed-once flag and the mobile/desktop view cookie fallback |
+| Persistence | Cloud DB for schedule/templates; `localStorage` only for seed-once flag and the mobile/desktop view cookie fallback |
 
 ### Notable conventions
 - **Never** hardcode Tailwind color utilities like `text-white`, `bg-black`, `bg-[#…]`. All colors come from semantic tokens in `src/index.css`.
