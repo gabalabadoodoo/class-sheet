@@ -7,7 +7,7 @@ Onboarding document for LLMs (Claude / Cursor / etc.) taking over maintenance an
 ## 1. Project Overview & Core Stack
 
 ### Purpose
-A **personal university class schedule web app** for a single student user. Users sign in, then manage their weekly class schedule through three synchronized views (Today, Week, Table). All data (classes, templates, settings) is stored per-user in a cloud database (Supabase, surfaced to the user as "Lovable Cloud") and syncs across every device the user logs into. Designed mobile-first for a **Xiaomi 14T** viewport but supports a desktop layout via a toggle.
+A **personal university class schedule web app** for a single student user. Users sign in, then manage their weekly class schedule through three synchronized views (Today, Week, Table). All data (classes and templates) is stored per-user in a cloud database (Supabase, surfaced to the user as "Lovable Cloud") and syncs across every device the user logs into. Designed mobile-first for a **Xiaomi 14T** viewport but supports a desktop layout via a toggle.
 
 ### Tech Stack
 | Layer | Tool |
@@ -22,12 +22,13 @@ A **personal university class schedule web app** for a single student user. User
 | Data fetching | `@tanstack/react-query` (provider mounted, but hooks call Supabase directly) |
 | Backend | **Supabase** (Auth + Postgres + RLS). Referred to as "Lovable Cloud" in user-facing copy. |
 | Client | `@supabase/supabase-js` via `src/integrations/supabase/client.ts` (auto-generated, do not edit) |
-| Persistence | Cloud DB for schedule/templates/settings; `localStorage` only for seed-once flag and the mobile/desktop view cookie fallback |
+| Persistence | Cloud DB for schedule/templates; `localStorage` only for seed-once flag and the mobile/desktop view cookie fallback |
 
 ### Notable conventions
 - **Never** hardcode Tailwind color utilities like `text-white`, `bg-black`, `bg-[#…]`. All colors come from semantic tokens in `src/index.css`.
 - Class-color palette is defined in `src/lib/schedule-data.ts` (`CLASS_COLORS` + `hashColor` fallback). LEC/LAB variants share one color because `getClassColor` normalizes trailing " LEC"/" LAB".
 - No native mobile shell (Capacitor/APK was intentionally removed). Web only.
+- The app is **PWA-installable**: `manifest.webmanifest`, `sw.js`, and PWA meta tags are present; production builds register a service worker for app-shell caching. Preview/dev builds intentionally skip registration.
 
 ---
 
@@ -38,6 +39,7 @@ A **personal university class schedule web app** for a single student user. User
 - `src/App.tsx` — sets up `QueryClientProvider`, `TooltipProvider`, `Toaster`, `Sonner`, `BrowserRouter`, `AuthProvider`, then routes.
 
 ### Route map
+
 | Path | Component | Guard | Purpose |
 |---|---|---|---|
 | `/` | `src/pages/Index.tsx` | `<ProtectedRoute>` (redirects to `/auth` if no session) | Main app: header + tabs (Today / Week / Table) |
@@ -138,7 +140,7 @@ Index (page)
   - Per-entry Edit / Delete.
 - **Clear All**: confirmation dialog → `clearSchedule()` deletes every row for the user.
 - **Import Schedule**: opens `ImportScheduleDialog` for paste-based OCR-style import.
-- **Templates section** (see 3.13).
+- **Templates section** (see 3.14).
 - **File**: `src/components/ClassManagerDialog.tsx`.
 
 ### 3.11 ClassFormDialog (add / edit)
@@ -159,22 +161,28 @@ Index (page)
 - **Required CSV header**: `Courses,Title,Section,Units,Days,Time,Room`.
 - **Parser logic** (`src/lib/csv-import.ts`):
   - Reads CSV with quoted-field support.
-  - Skips duplicate course codes across the file.
+  - Skips duplicate course codes within the uploaded file.
   - Groups rows by base course code: a row whose course code ends in `L` (e.g., `CCS0043L`) is merged as the **LAB** variant under the same class as the non-`L` row (e.g., `CCS0043` lecture).
   - Splits `Days`, `Time`, and `Room` on ` / ` to support multiple slots per row.
   - Validates that the three segments have matching counts after splitting; warns if not.
   - Maps day tokens (`M`, `T`, `W`, `TH`, `F`, `S`, etc.) to `DayOfWeek`.
   - Parses each time segment through `parseTimeRange` (handles `07:00:00-09:40:00`, `9am-10:30am`, `2100-1900`, etc.).
   - Auto-generates a short, editable class name from the `Title` via `abbreviateTitle` (strips `(LEC)`/`(LAB)` and stops on common words).
+- **Conflict resolution against existing classes** (`src/components/CsvImportDialog.tsx`):
+  - Before showing the preview, the dialog compares every incoming lecture/lab code against the current user's existing `class_id`s.
+  - Conflicting codes are flagged with **Already exists** badges and default to **Skip**.
+  - The user can toggle each conflict to **Skip** (ignore that code) or **Replace** (delete the existing DB entry and import the new one).
+  - On confirm, the parent receives the list of entries to import plus a list of `class_id`s to replace; `ClassManagerDialog.tsx` routes replacements through `onDeleteImmediate` so the delete + insert happens atomically without an undo toast.
 - **Preview/edit dialog** (`src/components/CsvImportDialog.tsx`):
   - Drag/choose file upload.
   - Lists each parsed class with editable class name, lecture code, lab code, section, and each schedule's day, location, and time range.
   - Per-class warning badges.
-  - Global warning list (e.g., duplicate course codes, mismatched segment counts).
+  - Global warning list (e.g., duplicate course codes within the file, mismatched segment counts).
   - **Confirm Import** only writes to the database after the user edits and confirms; **Cancel** discards everything.
 - **Edge cases handled**:
   - Mismatched `Days / Time / Room` segment counts → warning on that class.
-  - Duplicate course codes → skipped globally with a warning.
+  - Duplicate course codes within the file → skipped globally with a warning.
+  - Duplicate course codes that already exist in the DB → per-code Skip/Replace choice.
   - More than two schedules after grouping → still displayed and flagged for review.
   - Unparseable time ranges → caught at confirm time and reported as a toast error.
 - **Files**: `src/lib/csv-import.ts`, `src/components/CsvImportDialog.tsx`, wired into `src/components/ClassManagerDialog.tsx` via a **CSV** button.
@@ -185,6 +193,7 @@ Index (page)
 - **Note**: This is the older, heuristic importer. The CSV importer is preferred for structured exports.
 
 ### 3.14 Schedule templates (backup system)
+
 - **Function**: Save up to **3** named snapshots of the current schedule; load one (replaces current) or delete it.
 - **Files**: `src/hooks/useTemplates.ts`, integrated into `ClassManagerDialog.tsx`.
 - **User flow**:
@@ -209,6 +218,18 @@ Index (page)
 
 ### 3.19 Delete-with-Undo
 - `src/lib/delete-with-undo.ts` wraps `deleteClass` + `addClass` with a 5s `sonner` toast offering Undo. Used at every user-initiated delete call site (TableView, ClassManagerDialog). CSV Replace flow bypasses this via `onDeleteImmediate` for atomic behavior.
+
+### 3.20 PWA support
+- **Function**: Allow the app to be installed as a standalone app on mobile/desktop and provide offline app-shell caching.
+- **Files**:
+  - `public/manifest.webmanifest` — app metadata (name, short name, icons, theme colors, display mode `standalone`).
+  - `public/icon-512.png` — app icon / Apple touch icon.
+  - `public/sw.js` — minimal service worker: NetworkFirst for navigations/HTML, CacheFirst for hashed `/assets` and static files; versioned cache (`classsheet-v1`).
+  - `index.html` — PWA meta tags (`theme-color`, `viewport-fit=cover`, `apple-mobile-web-app-capable`, manifest link, apple-touch-icon).
+  - `src/main.tsx` — registers `/sw.js` only in production and only on non-preview origins; unregisters any existing worker in preview/dev iframes to avoid stale caching during development.
+- **Behavior**:
+  - Production published origin → installable, standalone display, cached app shell.
+  - Lovable preview / dev iframe → service worker intentionally unregistered so live reload and preview updates keep working.
 
 ---
 
@@ -245,16 +266,6 @@ RLS policies (all scoped by `auth.uid() = user_id`): `SELECT`, `INSERT`, `UPDATE
 
 Same RLS pattern as above. Max 3 enforced client-side.
 
-### Table `public.user_settings`
-| Column | Type | Notes |
-|---|---|---|
-| `user_id` | uuid PK | owner |
-| `notifications_enabled` | boolean | default `false` |
-| `minutes_before` | integer | default `10` |
-| `updated_at` | timestamptz | default `now()` |
-
-RLS scoped by `auth.uid() = user_id`. Only consumed by the (currently unwired) notifications hook.
-
 ### DB functions / triggers
 - `public.set_updated_at()` — trigger function for updating `updated_at`. No explicit triggers listed at time of writing; `updated_at` on `classes` is written by the client through `entryToRow` on updates (Supabase timestamp default handles the rest).
 
@@ -265,6 +276,7 @@ RLS scoped by `auth.uid() = user_id`. Only consumed by the (currently unwired) n
 - None.
 
 ### TypeScript model
+
 `src/lib/schedule-data.ts` defines:
 ```ts
 type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY";
@@ -300,16 +312,15 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 ## 6. Known Limitations & Pending Work
 
 - **No realtime sync.** Updates on one device only appear on other devices after refresh. Adding realtime would be a `supabase.channel(...).on('postgres_changes', ...)` subscription inside `useSchedule` and (optionally) `useTemplates`.
-- **Notifications feature is dead code.** `src/hooks/useNotifications.ts` and the `user_settings` table exist but no UI triggers them (bell button was removed on user request). Do not resurrect without confirmation.
 - **`classes.color` column unused.** Colors are derived from `className` via `getClassColor`. If per-class custom colors are added later, this column is the intended storage.
 - **Default schedule is hard-coded** in `src/lib/schedule-data.ts` (`DEFAULT_SCHEDULE`, 14 entries specific to one student's TS21 section). Anyone else who signs up gets these as their initial schedule until they Reset/Clear/Edit.
 - **First-run seeding uses `localStorage`** (`uni-schedule-seeded-<userId>`). If a user clears storage on a new device with an empty DB, they'd re-seed — acceptable but worth knowing.
 - **Time storage is stringly-typed** (`"7:00 AM"`). Parsing lives in `parseTime` (`schedule-data.ts`) and `parseFlexibleTime`/`parseTimeRange` (`time-format.ts`). Any new time-consuming code must go through these helpers.
 - **Section defaulting**: empty section input → stored as `'TS21'` (see `entryToRow`). UI additionally falls back to `'TS21'` on display when the field is empty (belt-and-braces).
 - **`ImportScheduleDialog`** uses a heuristic parser — brittle on unexpected OCR formats. No test coverage.
-- **CSV import is intentionally strict**: it expects the exact header `Courses,Title,Section,Units,Days,Time,Room` and groups lecture/lab rows by trailing `L`. It warns on duplicates and mismatched multi-slot segments, but it will still import rows with >2 schedules if the user confirms.
+- **CSV import is intentionally strict**: it expects the exact header `Courses,Title,Section,Units,Days,Time,Room` and groups lecture/lab rows by trailing `L`. It warns on duplicates within the file, mismatched multi-slot segments, and >2 schedules. It also checks each incoming code against the existing DB and offers per-code Skip/Replace before writing anything.
 - **Testing**: `vitest` is configured (`src/test/example.test.ts` only). No component or hook tests for the schedule logic.
-- **SEO/meta**: `index.html` should already have app-specific `<title>` and `<meta name="description">`; verify before publishing changes.
+- **SEO/meta**: `index.html` has app-specific `<title>`, `<meta name="description">`, Open Graph, and Twitter card tags. Verified.
 - **README** is a stub (`TODO: Document your project here`).
 - **No password reset / no Google OAuth / no email verification UX flow.**
 - **`useSchedule` refetches happen only via the initial effect and after each mutation** — no `refresh` is called on window focus.
@@ -328,7 +339,8 @@ DB row ↔ `ClassEntry` mapping lives in `useSchedule.ts` (`rowToEntry` / `entry
 | Time parsing | `src/lib/time-format.ts` |
 | Schedule CRUD | `src/hooks/useSchedule.ts` |
 | Templates CRUD | `src/hooks/useTemplates.ts` |
-| Notifications (unused) | `src/hooks/useNotifications.ts` |
+| Delete-with-Undo | `src/lib/delete-with-undo.ts` (used by `Index.tsx`) |
+| PWA manifest / service worker | `public/manifest.webmanifest`, `public/sw.js`, `public/icon-512.png`, `index.html`, `src/main.tsx` |
 | Views | `src/components/TodayView.tsx`, `CalendarView.tsx`, `TableView.tsx`, `CountdownCard.tsx` |
 | Dialogs | `src/components/ClassManagerDialog.tsx`, `ClassFormDialog.tsx`, `ImportScheduleDialog.tsx`, `CsvImportDialog.tsx` |
 | CSV import | `src/lib/csv-import.ts` |
